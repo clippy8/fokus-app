@@ -21,6 +21,7 @@ class RegisterViewTests(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:onboarding-profile"))
         user = User.objects.get(username="newuser")
         self.assertTrue(Profile.objects.filter(user=user).exists())
         self.assertTrue(Token.objects.filter(user=user).exists())
@@ -40,3 +41,37 @@ class RegisterViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(User.objects.filter(username="newuser2").exists())
+
+
+class OnboardingProfileViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="alice", password="pw")
+        self.client.force_login(self.user)
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self.client.get(reverse("accounts:onboarding-profile"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_fills_in_height_and_weight(self):
+        response = self.client.post(
+            reverse("accounts:onboarding-profile"),
+            {"groesse_cm": "180", "gewicht_kg": "75.5"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("dailydash:today"))
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.groesse_cm, 180)
+        self.assertEqual(str(self.user.profile.gewicht_kg), "75.50")
+
+    def test_can_be_skipped_without_data(self):
+        response = self.client.post(reverse("accounts:onboarding-profile"), {"skip": "1"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("dailydash:today"))
+        self.user.profile.refresh_from_db()
+        self.assertIsNone(self.user.profile.groesse_cm)
+
+    def test_fields_are_optional(self):
+        response = self.client.post(reverse("accounts:onboarding-profile"), {})
+        self.assertEqual(response.status_code, 302)

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Willkommen — Fokus App{% endblock %}
+
+{% block content %}
+<article style="max-width: 480px; margin: 2rem auto;">
+    <p><small>Schritt 1 — Dein Profil</small></p>
+    <h1>Willkommen bei Fokus App!</h1>
+    <p>Bevor es losgeht, kannst du optional ein paar Angaben zu dir machen. Du kannst diesen Schritt auch überspringen und später nachtragen.</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Weiter</button>
+        <button type="submit" name="skip" value="1" class="secondary">Überspringen</button>
+    </form>
+</article>
+{% endblock %}

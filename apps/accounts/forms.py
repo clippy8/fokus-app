@@ -1,5 +1,8 @@
+from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+
+from .models import Profile
 
 
 class RegisterForm(UserCreationForm):
@@ -10,3 +13,13 @@ class RegisterForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ["username", "first_name", "last_name", "email"]
+
+
+class OnboardingProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ["groesse_cm", "gewicht_kg"]
+        labels = {
+            "groesse_cm": "Größe (cm)",
+            "gewicht_kg": "Gewicht (kg)",
+        }
