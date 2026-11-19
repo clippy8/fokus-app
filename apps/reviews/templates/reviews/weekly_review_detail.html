@@ -1,21 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}Weekly Review {{ review.iso_year }}-W{{ review.iso_week }} — Fokus App{% endblock %}
+{% block title %}Wochenrückblick {{ review.iso_year }}-W{{ review.iso_week }} — Fokus App{% endblock %}
 
 {% block content %}
-<h1>Weekly Review — KW {{ review.iso_week }}/{{ review.iso_year }}</h1>
+<h1>Wochenrückblick — KW {{ review.iso_week }}/{{ review.iso_year }}</h1>
 <p><small>{{ week_start }} bis {{ week_end }}</small></p>
 
 <article>
     <h3>Habits erfüllt</h3>
     <h4>Daily</h4>
-    <ul>
-        {% for entry in daily_summary %}
-            <li>{{ entry.habit.name }}: {{ entry.checked }} / {{ entry.total }} Tage</li>
-        {% empty %}
-            <li>Keine Daily Habits.</li>
-        {% endfor %}
-    </ul>
+    {% if daily_summary %}
+        <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Habit</th>
+                    {% for label in week_day_labels %}
+                        <th style="text-align: center;">{{ label }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in daily_summary %}
+                    <tr>
+                        <td>{{ entry.habit.name }}</td>
+                        {% for checked in entry.checks %}
+                            <td style="text-align: center;">{% if checked %}✓{% else %}–{% endif %}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    {% else %}
+        <p>Keine Daily Habits.</p>
+    {% endif %}
     <h4>Weekly</h4>
     <ul>
         {% for entry in weekly_summary %}
@@ -73,7 +92,75 @@
 </article>
 
 <article>
-    <h3>Fitness &amp; Finanzen</h3>
+    <h3>Notizen — spontane Ideen</h3>
+    <ul>
+        {% for notiz in notizen %}
+            <li>
+                {{ notiz.title }}{% if notiz.comment %}: {{ notiz.comment }}{% endif %}
+                <br>
+                <a href="{% url 'dokumente:notiz-convert' pk=notiz.pk %}?next={% url 'reviews:detail' iso_year=review.iso_year iso_week=review.iso_week %}">In Projekt umwandeln</a>
+                ·
+                <form method="post" action="{% url 'dokumente:delete' pk=notiz.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'reviews:detail' iso_year=review.iso_year iso_week=review.iso_week %}">
+                    <button type="submit" class="secondary outline" style="display: inline; width: auto; padding: 0.2rem 0.6rem;">Löschen</button>
+                </form>
+            </li>
+        {% empty %}
+            <li>Keine offenen Notizen.</li>
+        {% endfor %}
+    </ul>
+    <p><a href="{% url 'dokumente:add' %}">+ Neue Notiz anlegen</a></p>
+</article>
+
+<article>
+    <h3>Fitness</h3>
+    <div style="overflow-x: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                {% for label in week_day_labels %}
+                    <th style="text-align: center;">{{ label }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Essen</td>
+                {% for items in fitness_week.food %}
+                    <td>
+                        {% if items %}
+                            <ul style="margin: 0; padding-left: 1.1rem;">
+                                {% for item in items %}<li>{{ item }}</li>{% endfor %}
+                            </ul>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Sport</td>
+                {% for items in fitness_week.workout %}
+                    <td>
+                        {% if items %}
+                            <ul style="margin: 0; padding-left: 1.1rem;">
+                                {% for item in items %}<li>{{ item }}</li>{% endfor %}
+                            </ul>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</article>
+
+<article>
+    <h3>Finanzen</h3>
     <p><em>Kommt in einer späteren Phase.</em></p>
 </article>
 
@@ -86,5 +173,5 @@
     </form>
 </article>
 
-<p><a href="{% url 'reviews:history' %}">Alle Weekly Reviews ansehen</a></p>
+<p><a href="{% url 'reviews:history' %}">Alle Wochenrückblicke ansehen</a></p>
 {% endblock %}
