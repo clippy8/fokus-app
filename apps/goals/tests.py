@@ -69,6 +69,23 @@ class JahreszielProgressTests(TestCase):
         ziel = make_ziel(self.user, "Überschritten", start_value=0, current_value=150, target_value=100)
         self.assertEqual(ziel.progress_percent, 100)
 
+    def test_progress_percent_works_for_decreasing_goal(self):
+        # Zielgewicht erreichen: Start 100 kg, Ziel 70 kg — der Zielwert ist kleiner als der Startwert.
+        ziel = make_ziel(self.user, "Zielgewicht erreichen", start_value=100, current_value=100, target_value=70)
+        self.assertEqual(ziel.progress_percent, 0)
+        ziel.current_value = 85
+        ziel.save()
+        self.assertEqual(ziel.progress_percent, 50)
+        ziel.current_value = 70
+        ziel.save()
+        self.assertEqual(ziel.progress_percent, 100)
+        ziel.current_value = 65
+        ziel.save()
+        self.assertEqual(ziel.progress_percent, 100)
+        ziel.current_value = 105
+        ziel.save()
+        self.assertEqual(ziel.progress_percent, 0)
+
     def test_progress_percent_zero_span_defaults_to_status(self):
         ziel = make_ziel(self.user, "Kein Unterschied", start_value=5, current_value=5, target_value=5)
         self.assertEqual(ziel.progress_percent, 0)
@@ -107,6 +124,10 @@ class MeilensteinProgressTests(TestCase):
 
     def test_progress_percent_uses_start_stand_target(self):
         meilenstein = make_meilenstein(self.ziel, "M1", start_value=0, current_value=5, target_value=10)
+        self.assertEqual(meilenstein.progress_percent, 50)
+
+    def test_progress_percent_works_for_decreasing_goal(self):
+        meilenstein = make_meilenstein(self.ziel, "Abnehmen", start_value=100, current_value=85, target_value=70)
         self.assertEqual(meilenstein.progress_percent, 50)
 
     def test_progress_percent_clamped_to_100(self):
