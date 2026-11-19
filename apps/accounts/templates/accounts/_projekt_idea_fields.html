@@ -1,0 +1,18 @@
+<div class="idea-row">
+    {{ form.id }}
+    {% if form.instance.pk %}<span style="display:none;">{{ form.DELETE }}</span>{% endif %}
+    {% if form.non_field_errors %}
+        <p style="color: var(--pico-del-color);">{{ form.non_field_errors|join:", " }}</p>
+    {% endif %}
+    <div class="grid">
+        {{ form.title }}
+        {{ form.next_step }}
+    </div>
+    {{ form.title.errors }}
+    <div class="grid">
+        <label>Von {{ form.start_date }}</label>
+        <label>Bis {{ form.end_date }}</label>
+    </div>
+    <button type="button" class="remove-idea-btn secondary">Entfernen</button>
+    <hr>
+</div>

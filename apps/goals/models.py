@@ -129,11 +129,13 @@ class Meilenstein(models.Model):
 
 
 class Projekt(models.Model):
+    IDEA = "idea"
     ACTIVE = "active"
     PAUSED = "paused"
     DONE = "done"
     ARCHIVED = "archived"
     STATUS_CHOICES = [
+        (IDEA, "Idea"),
         (ACTIVE, "Active"),
         (PAUSED, "Paused"),
         (DONE, "Done"),
@@ -143,8 +145,10 @@ class Projekt(models.Model):
     meilenstein = models.ForeignKey(Meilenstein, on_delete=models.CASCADE, related_name="projekte")
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=ACTIVE)
+    next_step = models.CharField(max_length=255, blank=True, verbose_name="Nächster Schritt")
+    start_date = models.DateField(null=True, blank=True, verbose_name="Von")
+    end_date = models.DateField(null=True, blank=True, verbose_name="Bis")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=IDEA)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

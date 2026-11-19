@@ -79,7 +79,18 @@ class MeilensteinSerializer(serializers.ModelSerializer):
 class ProjektSerializer(serializers.ModelSerializer):
     class Meta:
         model = Projekt
-        fields = ["id", "meilenstein", "title", "description", "end_date", "status", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "meilenstein",
+            "title",
+            "description",
+            "next_step",
+            "start_date",
+            "end_date",
+            "status",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
 

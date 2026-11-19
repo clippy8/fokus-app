@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Deine Projektideen — Fokus App{% endblock %}
+
+{% block content %}
+<p><small>Schritt 4 — Deine Projektideen</small></p>
+<h1>Wie könntest du deine Meilensteine erreichen?</h1>
+
+<article>
+    <p>
+        Sammle jetzt zu jedem Meilenstein Projektideen — und zwar ausdrücklich als
+        <strong>Brainstorming</strong>, nicht als sorgfältige Planung. Überlege jetzt noch nicht, wann du
+        ein Projekt angehst, ob es machbar, notwendig oder sinnvoll ist. Schreib bewusst mehr Ideen auf,
+        als du am Ende tatsächlich umsetzen wirst.
+    </p>
+    <p>
+        Im Weekly Review schaust du dir diese Liste jede Woche erneut an und kannst Ideen verwerfen, die
+        sich als nicht sinnvoll herausstellen, oder neue ergänzen. Jede Idee kann beliebig oft erweitert
+        werden — es gibt keine feste Anzahl.
+    </p>
+</article>
+
+<form method="post">
+    {% csrf_token %}
+    {% for section in sections %}
+        <details open>
+            <summary><strong>{{ section.ziel.title }}</strong></summary>
+            {% for item in section.items %}
+                <details open class="meilenstein-section" data-prefix="m{{ item.meilenstein.id }}" style="margin-left: 1.5rem;">
+                    <summary>{{ item.meilenstein.title }}</summary>
+
+                    {{ item.formset.management_form }}
+                    {% if item.formset.non_form_errors %}
+                        <p style="color: var(--pico-del-color);">{{ item.formset.non_form_errors|join:", " }}</p>
+                    {% endif %}
+
+                    <div class="idea-rows">
+                        {% for form in item.formset %}
+                            {% include "accounts/_projekt_idea_fields.html" with form=form %}
+                        {% endfor %}
+                    </div>
+
+                    <template class="empty-form-template">
+                        {% include "accounts/_projekt_idea_fields.html" with form=item.formset.empty_form %}
+                    </template>
+
+                    <button type="button" class="add-idea-btn secondary">+ weitere Idee</button>
+                </details>
+            {% endfor %}
+        </details>
+    {% endfor %}
+    <button type="submit">Fertig</button>
+</form>
+
+<script>
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('add-idea-btn')) {
+        var section = e.target.closest('.meilenstein-section');
+        var prefix = section.dataset.prefix;
+        var totalInput = section.querySelector('input[name="' + prefix + '-TOTAL_FORMS"]');
+        var index = parseInt(totalInput.value, 10);
+        var templateEl = section.querySelector('.empty-form-template');
+        var html = templateEl.innerHTML.split('__prefix__').join(index);
+        var wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        section.querySelector('.idea-rows').appendChild(wrapper.firstElementChild);
+        totalInput.value = index + 1;
+    } else if (e.target.classList.contains('remove-idea-btn')) {
+        var row = e.target.closest('.idea-row');
+        var deleteCheckbox = row.querySelector('input[type="checkbox"]');
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = true;
+            row.style.display = 'none';
+        } else {
+            row.remove();
+        }
+    }
+});
+</script>
+{% endblock %}

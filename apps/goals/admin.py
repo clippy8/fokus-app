@@ -29,7 +29,7 @@ class MeilensteinAdmin(admin.ModelAdmin):
 
 @admin.register(Projekt)
 class ProjektAdmin(admin.ModelAdmin):
-    list_display = ("meilenstein", "title", "status", "end_date")
+    list_display = ("meilenstein", "title", "status", "start_date", "end_date", "next_step")
     list_filter = ("status",)
 
 

@@ -85,7 +85,26 @@ class OnboardingMeilensteinForm(forms.ModelForm):
 class ProjektForm(forms.ModelForm):
     class Meta:
         model = Projekt
-        fields = ["title", "description", "end_date", "status"]
+        fields = ["title", "description", "next_step", "start_date", "end_date", "status"]
+        widgets = {
+            **DATE_WIDGETS,
+            "description": forms.Textarea(attrs={"rows": 3}),
+        }
+
+
+class OnboardingProjektIdeaForm(forms.ModelForm):
+    class Meta:
+        model = Projekt
+        fields = ["title", "next_step", "start_date", "end_date"]
+        widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "Projektidee"}),
+            "next_step": forms.TextInput(attrs={"placeholder": "Nächster Schritt (optional)"}),
+            **DATE_WIDGETS,
+        }
+        labels = {
+            "start_date": "Von",
+            "end_date": "Bis",
+        }
 
 
 class TodoForm(forms.ModelForm):

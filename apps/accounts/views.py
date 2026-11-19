@@ -1,10 +1,10 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.forms import formset_factory
+from django.forms import formset_factory, modelformset_factory
 from django.shortcuts import redirect, render
 
-from apps.goals.forms import OnboardingGoalForm, OnboardingMeilensteinForm
-from apps.goals.models import Jahresziel
+from apps.goals.forms import OnboardingGoalForm, OnboardingMeilensteinForm, OnboardingProjektIdeaForm
+from apps.goals.models import Jahresziel, Meilenstein, Projekt
 
 from .forms import OnboardingProfileForm, RegisterForm
 
@@ -14,7 +14,8 @@ from .forms import OnboardingProfileForm, RegisterForm
 # "stepN" view below and pointing the previous step's redirect at it.
 NEXT_AFTER_ONBOARDING_PROFILE = "accounts:onboarding-goals"
 NEXT_AFTER_ONBOARDING_GOALS = "accounts:onboarding-meilensteine"
-NEXT_AFTER_ONBOARDING_MEILENSTEINE = "dailydash:today"
+NEXT_AFTER_ONBOARDING_MEILENSTEINE = "accounts:onboarding-projekte"
+NEXT_AFTER_ONBOARDING_PROJEKTE = "dailydash:today"
 
 JahreszielFormSet = formset_factory(
     OnboardingGoalForm, extra=3, min_num=3, max_num=3, validate_min=True, validate_max=True
@@ -23,6 +24,11 @@ JahreszielFormSet = formset_factory(
 MeilensteinFormSet = formset_factory(
     OnboardingMeilensteinForm, extra=3, min_num=3, max_num=3, validate_min=True, validate_max=True
 )
+
+# Projekt ideas are an open-ended brainstorm, not a fixed count: no min/max,
+# and a modelformset (not a plain formset) so revisiting this step shows
+# ideas already captured and lets you add more or discard ones you typed.
+ProjektIdeaFormSet = modelformset_factory(Projekt, form=OnboardingProjektIdeaForm, extra=1, can_delete=True)
 
 GOAL_TITLE_EXAMPLES = ["Sportlich werden", "Einkommen verdoppeln", "Eigene App veröffentlichen"]
 
@@ -112,3 +118,48 @@ def onboarding_meilensteine(request):
             form.fields["title"].widget.attrs["placeholder"] = "Name des Meilensteins"
         sections.append({"ziel": ziel, "formset": formset})
     return render(request, "accounts/onboarding_meilensteine.html", {"sections": sections})
+
+
+@login_required
+def onboarding_projekte(request):
+    meilensteine = list(
+        Meilenstein.objects.filter(jahresziel__user=request.user, jahresziel__archived=False)
+        .select_related("jahresziel")
+        .order_by("jahresziel_id", "id")
+    )
+    if not meilensteine:
+        return redirect(NEXT_AFTER_ONBOARDING_PROJEKTE)
+
+    if request.method == "POST":
+        formsets = {
+            m.id: ProjektIdeaFormSet(
+                request.POST, prefix=f"m{m.id}", queryset=Projekt.objects.filter(meilenstein=m)
+            )
+            for m in meilensteine
+        }
+        if all(formsets[m.id].is_valid() for m in meilensteine):
+            for m in meilensteine:
+                formset = formsets[m.id]
+                instances = formset.save(commit=False)
+                for obj in formset.deleted_objects:
+                    obj.delete()
+                for instance in instances:
+                    instance.meilenstein = m
+                    instance.save()
+            return redirect(NEXT_AFTER_ONBOARDING_PROJEKTE)
+    else:
+        formsets = {
+            m.id: ProjektIdeaFormSet(prefix=f"m{m.id}", queryset=Projekt.objects.filter(meilenstein=m))
+            for m in meilensteine
+        }
+
+    ziele_order = []
+    sections_by_ziel = {}
+    for m in meilensteine:
+        ziel = m.jahresziel
+        if ziel.id not in sections_by_ziel:
+            ziele_order.append(ziel)
+            sections_by_ziel[ziel.id] = {"ziel": ziel, "items": []}
+        sections_by_ziel[ziel.id]["items"].append({"meilenstein": m, "formset": formsets[m.id]})
+    sections = [sections_by_ziel[ziel.id] for ziel in ziele_order]
+    return render(request, "accounts/onboarding_projekte.html", {"sections": sections})

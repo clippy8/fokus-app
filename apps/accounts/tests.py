@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from rest_framework.authtoken.models import Token
 
-from apps.goals.models import Jahresziel, Meilenstein
+from apps.goals.models import Jahresziel, Meilenstein, Projekt
 
 from .models import Profile
 
@@ -52,6 +52,19 @@ def meilenstein_formset_data(prefix, count=3):
                 f"{prefix}-{i}-target_value": "10",
             }
         )
+    return data
+
+
+def projekt_idea_formset_data(prefix, titles, initial=0, extra_blank=0, deletes=None):
+    deletes = deletes or set()
+    data = {
+        f"{prefix}-TOTAL_FORMS": str(len(titles) + extra_blank),
+        f"{prefix}-INITIAL_FORMS": str(initial),
+    }
+    for i, title in enumerate(titles):
+        data[f"{prefix}-{i}-title"] = title
+        if i in deletes:
+            data[f"{prefix}-{i}-DELETE"] = "on"
     return data
 
 
@@ -194,13 +207,13 @@ class OnboardingMeilensteineViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
 
-    def test_redirects_to_dashboard_if_no_goals(self):
+    def test_redirects_to_next_step_if_no_goals(self):
         self.ziele[0].delete()
         self.ziele[1].delete()
         self.ziele[2].delete()
         response = self.client.get(reverse("accounts:onboarding-meilensteine"))
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("dailydash:today"))
+        self.assertEqual(response.url, reverse("accounts:onboarding-projekte"))
 
     def test_creates_three_milestones_per_goal(self):
         data = {}
@@ -208,7 +221,7 @@ class OnboardingMeilensteineViewTests(TestCase):
             data.update(meilenstein_formset_data(f"ziel{ziel.id}"))
         response = self.client.post(reverse("accounts:onboarding-meilensteine"), data)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("dailydash:today"))
+        self.assertEqual(response.url, reverse("accounts:onboarding-projekte"))
         for ziel in self.ziele:
             meilensteine = Meilenstein.objects.filter(jahresziel=ziel)
             self.assertEqual(meilensteine.count(), 3)
@@ -227,7 +240,7 @@ class OnboardingMeilensteineViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Meilenstein.objects.count(), 0)
 
-    def test_already_having_three_per_goal_skips_to_dashboard(self):
+    def test_already_having_three_per_goal_skips_to_next_step(self):
         today = timezone.localdate()
         for ziel in self.ziele:
             for i in range(3):
@@ -236,4 +249,59 @@ class OnboardingMeilensteineViewTests(TestCase):
                 )
         response = self.client.get(reverse("accounts:onboarding-meilensteine"))
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:onboarding-projekte"))
+
+
+class OnboardingProjekteViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="alice", password="pw")
+        self.client.force_login(self.user)
+        today = timezone.localdate()
+        self.ziel = Jahresziel.objects.create(
+            user=self.user,
+            title="Ziel",
+            description="x",
+            start_date=today,
+            end_date=today + timedelta(days=300),
+        )
+        self.meilenstein = Meilenstein.objects.create(
+            jahresziel=self.ziel, title="M1", description="x", deadline=today + timedelta(days=100)
+        )
+        self.prefix = f"m{self.meilenstein.id}"
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self.client.get(reverse("accounts:onboarding-projekte"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_redirects_to_dashboard_if_no_meilensteine(self):
+        self.meilenstein.delete()
+        response = self.client.get(reverse("accounts:onboarding-projekte"))
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("dailydash:today"))
+
+    def test_empty_submission_is_allowed(self):
+        data = projekt_idea_formset_data(self.prefix, [""])
+        response = self.client.post(reverse("accounts:onboarding-projekte"), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("dailydash:today"))
+        self.assertEqual(Projekt.objects.count(), 0)
+
+    def test_can_submit_more_than_three_ideas_for_one_milestone(self):
+        titles = [f"Idee {i}" for i in range(5)]
+        data = projekt_idea_formset_data(self.prefix, titles)
+        response = self.client.post(reverse("accounts:onboarding-projekte"), data)
+        self.assertEqual(response.status_code, 302)
+        projekte = Projekt.objects.filter(meilenstein=self.meilenstein)
+        self.assertEqual(projekte.count(), 5)
+        for p in projekte:
+            self.assertEqual(p.status, Projekt.IDEA)
+
+    def test_revisit_prefills_existing_ideas_and_allows_deletion(self):
+        p1 = Projekt.objects.create(meilenstein=self.meilenstein, title="Bestehende Idee")
+        data = projekt_idea_formset_data(self.prefix, ["Bestehende Idee", ""], initial=1, deletes={0})
+        data[f"{self.prefix}-0-id"] = str(p1.id)
+        response = self.client.post(reverse("accounts:onboarding-projekte"), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Projekt.objects.filter(pk=p1.pk).exists())

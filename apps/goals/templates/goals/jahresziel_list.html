@@ -40,7 +40,8 @@
                 {% for projekt in meilenstein.projekte.all %}
                 <li>
                     {{ projekt.title }} — <em>{{ projekt.get_status_display }}</em>
-                    {% if projekt.end_date %}(bis {{ projekt.end_date }}){% endif %}
+                    {% if projekt.start_date or projekt.end_date %}({{ projekt.start_date|default:"?" }} bis {{ projekt.end_date|default:"?" }}){% endif %}
+                    {% if projekt.next_step %}· Nächster Schritt: {{ projekt.next_step }}{% endif %}
                     <a href="{% url 'goals:projekt-edit' pk=projekt.pk %}">Bearbeiten</a>
                     <span id="projekt-focus-{{ projekt.id }}">
                         <label>
