@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Deine Routinen — Fokus App{% endblock %}
+
+{% block content %}
+<p><small>Schritt 5 — Deine Routinen</small></p>
+<h1>Wie startest und beendest du deinen Tag?</h1>
+
+<article>
+    <p>
+        Lege jetzt deine <strong>Morgenroutine</strong> und <strong>Abendroutine</strong> fest — kurze
+        Checklisten, die dich jeden Tag auf dem Dashboard begleiten. Du kannst beliebig viele Punkte
+        hinzufügen oder wieder entfernen, zum Start haben wir dir ein paar Vorschläge eingetragen.
+    </p>
+    <p>
+        In der Abendroutine sollte ein Punkt zur <strong>Planung</strong> nicht fehlen — zum Beispiel
+        „Nächsten Tag im Kalender planen“ oder „Projekte für diese Woche planen“. So startest du nie
+        ohne Richtung in den nächsten Tag.
+    </p>
+</article>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="grid">
+        <section>
+            <h3>Morgenroutine</h3>
+            {{ morning_formset.management_form }}
+            {% if morning_formset.non_form_errors %}
+                <p style="color: var(--pico-del-color);">{{ morning_formset.non_form_errors|join:", " }}</p>
+            {% endif %}
+            <div class="idea-rows" data-prefix="morning">
+                {% for form in morning_formset %}
+                    {% include "accounts/_routine_item_fields.html" with form=form %}
+                {% endfor %}
+            </div>
+            <template class="empty-form-template" data-prefix="morning">
+                {% include "accounts/_routine_item_fields.html" with form=morning_formset.empty_form %}
+            </template>
+            <button type="button" class="add-idea-btn secondary" data-prefix="morning">+ weiterer Punkt</button>
+        </section>
+        <section>
+            <h3>Abendroutine</h3>
+            {{ evening_formset.management_form }}
+            {% if evening_formset.non_form_errors %}
+                <p style="color: var(--pico-del-color);">{{ evening_formset.non_form_errors|join:", " }}</p>
+            {% endif %}
+            <div class="idea-rows" data-prefix="evening">
+                {% for form in evening_formset %}
+                    {% include "accounts/_routine_item_fields.html" with form=form %}
+                {% endfor %}
+            </div>
+            <template class="empty-form-template" data-prefix="evening">
+                {% include "accounts/_routine_item_fields.html" with form=evening_formset.empty_form %}
+            </template>
+            <button type="button" class="add-idea-btn secondary" data-prefix="evening">+ weiterer Punkt</button>
+        </section>
+    </div>
+    <button type="submit">Fertig</button>
+</form>
+
+<script>
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('add-idea-btn')) {
+        var prefix = e.target.dataset.prefix;
+        var container = document.querySelector('.idea-rows[data-prefix="' + prefix + '"]');
+        var totalInput = document.querySelector('input[name="' + prefix + '-TOTAL_FORMS"]');
+        var index = parseInt(totalInput.value, 10);
+        var templateEl = document.querySelector('.empty-form-template[data-prefix="' + prefix + '"]');
+        var html = templateEl.innerHTML.split('__prefix__').join(index);
+        var wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        container.appendChild(wrapper.firstElementChild);
+        totalInput.value = index + 1;
+    } else if (e.target.classList.contains('remove-idea-btn')) {
+        var row = e.target.closest('.idea-row');
+        var deleteCheckbox = row.querySelector('input[type="checkbox"]');
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = true;
+            row.style.display = 'none';
+        } else {
+            row.remove();
+        }
+    }
+});
+</script>
+{% endblock %}

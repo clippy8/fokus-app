@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from rest_framework.authtoken.models import Token
 
+from apps.dailydash.models import RoutineItem
 from apps.goals.models import Jahresziel, Meilenstein, Projekt
 
 from .models import Profile
@@ -63,6 +64,19 @@ def projekt_idea_formset_data(prefix, titles, initial=0, extra_blank=0, deletes=
     }
     for i, title in enumerate(titles):
         data[f"{prefix}-{i}-title"] = title
+        if i in deletes:
+            data[f"{prefix}-{i}-DELETE"] = "on"
+    return data
+
+
+def routine_formset_data(prefix, names, initial=0, deletes=None):
+    deletes = deletes or set()
+    data = {
+        f"{prefix}-TOTAL_FORMS": str(len(names)),
+        f"{prefix}-INITIAL_FORMS": str(initial),
+    }
+    for i, name in enumerate(names):
+        data[f"{prefix}-{i}-name"] = name
         if i in deletes:
             data[f"{prefix}-{i}-DELETE"] = "on"
     return data
@@ -275,17 +289,17 @@ class OnboardingProjekteViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
 
-    def test_redirects_to_dashboard_if_no_meilensteine(self):
+    def test_redirects_to_next_step_if_no_meilensteine(self):
         self.meilenstein.delete()
         response = self.client.get(reverse("accounts:onboarding-projekte"))
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("dailydash:today"))
+        self.assertEqual(response.url, reverse("accounts:onboarding-routinen"))
 
     def test_empty_submission_is_allowed(self):
         data = projekt_idea_formset_data(self.prefix, [""])
         response = self.client.post(reverse("accounts:onboarding-projekte"), data)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("dailydash:today"))
+        self.assertEqual(response.url, reverse("accounts:onboarding-routinen"))
         self.assertEqual(Projekt.objects.count(), 0)
 
     def test_can_submit_more_than_three_ideas_for_one_milestone(self):
@@ -305,3 +319,63 @@ class OnboardingProjekteViewTests(TestCase):
         response = self.client.post(reverse("accounts:onboarding-projekte"), data)
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Projekt.objects.filter(pk=p1.pk).exists())
+
+
+class OnboardingRoutinenViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="alice", password="pw")
+        self.client.force_login(self.user)
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self.client.get(reverse("accounts:onboarding-routinen"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_first_visit_seeds_example_rows(self):
+        response = self.client.get(reverse("accounts:onboarding-routinen"))
+        self.assertEqual(response.status_code, 200)
+        morning_initial = [f.initial.get("name") for f in response.context["morning_formset"].forms]
+        evening_initial = [f.initial.get("name") for f in response.context["evening_formset"].forms]
+        self.assertEqual(morning_initial, ["Wasser trinken", "Liegestütze", "Kalender checken", "Bett machen"])
+        self.assertIn("Planung: Nächsten Tag im Kalender planen", evening_initial)
+
+    def test_submits_morning_and_evening_items(self):
+        data = {}
+        data.update(routine_formset_data("morning", ["Wasser trinken", "Bett machen"]))
+        data.update(routine_formset_data("evening", ["Zimmer aufräumen", "Planung: Nächsten Tag planen"]))
+        response = self.client.post(reverse("accounts:onboarding-routinen"), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("dailydash:today"))
+
+        morning = RoutineItem.objects.filter(user=self.user, timing=RoutineItem.MORNING)
+        evening = RoutineItem.objects.filter(user=self.user, timing=RoutineItem.EVENING)
+        self.assertEqual(sorted(morning.values_list("name", flat=True)), ["Bett machen", "Wasser trinken"])
+        self.assertEqual(
+            sorted(evening.values_list("name", flat=True)),
+            ["Planung: Nächsten Tag planen", "Zimmer aufräumen"],
+        )
+
+    def test_empty_submission_is_allowed(self):
+        data = {}
+        data.update(routine_formset_data("morning", [""]))
+        data.update(routine_formset_data("evening", [""]))
+        response = self.client.post(reverse("accounts:onboarding-routinen"), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(RoutineItem.objects.count(), 0)
+
+    def test_revisit_shows_existing_items_not_examples(self):
+        RoutineItem.objects.create(user=self.user, name="Eigener Punkt", timing=RoutineItem.MORNING)
+        response = self.client.get(reverse("accounts:onboarding-routinen"))
+        rendered_names = [f.instance.name for f in response.context["morning_formset"].forms if f.instance.pk]
+        self.assertEqual(rendered_names, ["Eigener Punkt"])
+
+    def test_can_delete_existing_item(self):
+        item = RoutineItem.objects.create(user=self.user, name="Weg damit", timing=RoutineItem.EVENING)
+        data = {}
+        data.update(routine_formset_data("morning", [""]))
+        data.update(routine_formset_data("evening", ["Weg damit", ""], initial=1, deletes={0}))
+        data["evening-0-id"] = str(item.id)
+        response = self.client.post(reverse("accounts:onboarding-routinen"), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(RoutineItem.objects.filter(pk=item.pk).exists())

@@ -10,4 +10,5 @@ urlpatterns = [
     path("onboarding/ziele/", views.onboarding_goals, name="onboarding-goals"),
     path("onboarding/meilensteine/", views.onboarding_meilensteine, name="onboarding-meilensteine"),
     path("onboarding/projekte/", views.onboarding_projekte, name="onboarding-projekte"),
+    path("onboarding/routinen/", views.onboarding_routinen, name="onboarding-routinen"),
 ]
