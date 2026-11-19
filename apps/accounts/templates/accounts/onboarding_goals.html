@@ -13,10 +13,11 @@
         Jahresende klar sagen kannst: <em>erreicht</em> oder <em>nicht erreicht</em>.
     </p>
     <p>
-        Je konkreter, desto besser. "Fitter werden" ist zu vage — <strong>"100 Liegestütze am Stück
-        schaffen"</strong> oder <strong>"drei Monate am Stück dreimal pro Woche ins Gym gehen"</strong>
-        kannst du dagegen eindeutig überprüfen. Formuliere jedes Ziel so, dass du im Dezember genau weißt,
-        ob du es erreicht hast.
+        Der <strong>Titel</strong> darf dabei ruhig groß und allgemein klingen, zum Beispiel
+        <strong>"Sportlich werden"</strong>. Entscheidend ist, dass du in der <strong>Beschreibung</strong>
+        eindeutig festlegst, was das konkret heißt — zum Beispiel <strong>"100 Liegestütze am Stück
+        schaffen"</strong> oder <strong>"ein Sixpack bekommen"</strong>. So weißt du im Dezember genau, ob
+        du das Ziel erreicht hast.
     </p>
     <p>Ein paar Beispiele aus verschiedenen Lebensbereichen, zur Inspiration — nicht zum Abschreiben:</p>
     <ul>
@@ -46,11 +47,31 @@
     {% endif %}
     {% for form in formset %}
         <article>
-            <h3>Ziel {{ forloop.counter }}</h3>
             {% if form.non_field_errors %}
                 <p style="color: var(--pico-del-color);">{{ form.non_field_errors|join:", " }}</p>
             {% endif %}
-            {{ form.as_p }}
+
+            {{ form.title }}
+            {% if form.title.errors %}
+                <p style="color: var(--pico-del-color);">{{ form.title.errors|join:", " }}</p>
+            {% endif %}
+
+            <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+            {% if form.description.help_text %}<small>{{ form.description.help_text }}</small>{% endif %}
+            {{ form.description.errors }}
+
+            <div class="grid">
+                <label for="{{ form.start_date.id_for_label }}">{{ form.start_date.label }}{{ form.start_date }}</label>
+                <label for="{{ form.end_date.id_for_label }}">{{ form.end_date.label }}{{ form.end_date }}</label>
+            </div>
+            {{ form.start_date.errors }}{{ form.end_date.errors }}
+
+            <div class="grid">
+                <label for="{{ form.start_value.id_for_label }}">{{ form.start_value.label }}{{ form.start_value }}</label>
+                <label for="{{ form.target_value.id_for_label }}">{{ form.target_value.label }}{{ form.target_value }}</label>
+            </div>
+            {{ form.start_value.errors }}{{ form.target_value.errors }}
         </article>
     {% endfor %}
     <button type="submit">Weiter</button>

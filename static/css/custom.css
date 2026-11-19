@@ -16,3 +16,20 @@
     height: 100%;
     background: var(--pico-primary);
 }
+
+.goal-title-input {
+    font-size: 1.5rem;
+    font-weight: 700;
+    border: none;
+    border-bottom: 2px solid var(--pico-muted-border-color);
+    border-radius: 0;
+    background: transparent;
+    padding: 0.25rem 0;
+    margin-bottom: 1rem;
+}
+
+.goal-title-input:focus {
+    outline: none;
+    border-bottom-color: var(--pico-primary);
+    box-shadow: none;
+}

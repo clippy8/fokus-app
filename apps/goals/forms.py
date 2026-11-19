@@ -33,6 +33,13 @@ class OnboardingGoalForm(forms.ModelForm):
         model = Jahresziel
         fields = ["title", "description", "start_date", "end_date", "start_value", "target_value"]
         widgets = {
+            "title": forms.TextInput(
+                attrs={
+                    "class": "goal-title-input",
+                    "placeholder": "Titel, z. B. „Sportlich werden“",
+                    "aria-label": "Titel des Ziels",
+                }
+            ),
             **DATE_WIDGETS,
             "description": forms.Textarea(attrs={"rows": 2}),
         }
