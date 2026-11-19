@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from apps.accounts.api_views import ProfileDetailAPIView
 from apps.dailydash.api_views import DayRoutineCheckViewSet, DayViewSet, RoutineItemViewSet
+from apps.dokumente.api_views import DokumentViewSet, NotizeintragViewSet
 from apps.finanzen.api_views import FinanceEntryViewSet
 from apps.fitness.api_views import (
     ExerciseCategoryViewSet,
@@ -40,6 +41,8 @@ router.register("workout-sets", WorkoutSetViewSet, basename="workout-set")
 router.register("recipes", RecipeViewSet, basename="recipe")
 router.register("food-log-entries", FoodLogEntryViewSet, basename="food-log-entry")
 router.register("finance-entries", FinanceEntryViewSet, basename="finance-entry")
+router.register("dokumente", DokumentViewSet, basename="dokument")
+router.register("notizeintraege", NotizeintragViewSet, basename="notizeintrag")
 
 urlpatterns = [
     path("profile/", ProfileDetailAPIView.as_view(), name="profile-detail"),

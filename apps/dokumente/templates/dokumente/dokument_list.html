@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Dokumente — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Dokumente</h1>
+<p><a href="{% url 'dokumente:add' %}" role="button">+ Neues Dokument</a></p>
+
+<form method="get" class="grid">
+    <select name="type" onchange="this.form.submit()">
+        <option value="">Alle Typen</option>
+        {% for value, label in type_choices %}
+        <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <select name="status" onchange="this.form.submit()">
+        <option value="">Alle Status</option>
+        {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <label>
+        <input type="checkbox" name="favorite" value="1" {% if favorite_only %}checked{% endif %} onchange="this.form.submit()">
+        Nur Favoriten
+    </label>
+</form>
+
+<div class="grid">
+    {% for dokument in dokumente %}
+    <article>
+        {% if dokument.image %}
+        <img src="{{ dokument.image.url }}" alt="{{ dokument.title }}" style="max-height: 150px; object-fit: cover; width: 100%;">
+        {% endif %}
+        <h4>
+            {% if dokument.favorite %}★{% endif %} {{ dokument.title }}
+        </h4>
+        <p>
+            {{ dokument.get_type_display }} · {{ dokument.get_status_display }}
+            {% if dokument.genre %} · {{ dokument.genre }}{% endif %}
+        </p>
+        {% if dokument.rating %}
+        <p>{{ dokument.rating_stars }}</p>
+        {% endif %}
+        {% if dokument.comment %}<p>{{ dokument.comment|truncatewords:25 }}</p>{% endif %}
+        {% if dokument.url %}<p><a href="{{ dokument.url }}" target="_blank" rel="noopener">Link öffnen</a></p>{% endif %}
+        <a href="{% url 'dokumente:edit' pk=dokument.pk %}">Bearbeiten</a>
+    </article>
+    {% empty %}
+    <p>Noch keine Dokumente angelegt.</p>
+    {% endfor %}
+</div>
+{% endblock %}

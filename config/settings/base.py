@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "apps.reviews",
     "apps.fitness",
     "apps.finanzen",
+    "apps.dokumente",
     "apps.api",
 ]
 
