@@ -1,45 +1,73 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
-MAX_JAHRESZIELE_PER_YEAR = 3
+MAX_JAHRESZIELE = 3
 MAX_MEILENSTEINE_PER_ZIEL = 3
 
 
 class Jahresziel(models.Model):
-    ACTIVE = "active"
-    DONE = "done"
-    ARCHIVED = "archived"
+    ON_TRACK = "on_track"
+    OFF_TRACK = "off_track"
+    AT_RISK = "at_risk"
+    ACHIEVED = "achieved"
     STATUS_CHOICES = [
-        (ACTIVE, "Active"),
-        (DONE, "Done"),
-        (ARCHIVED, "Archived"),
+        (ON_TRACK, "On Track"),
+        (OFF_TRACK, "Off Track"),
+        (AT_RISK, "At Risk"),
+        (ACHIEVED, "Achieved"),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="jahresziele")
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    year = models.PositiveSmallIntegerField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=ACTIVE)
+    description = models.TextField(
+        help_text="Beschreibe so konkret wie möglich, woran du erkennst, dass du das Ziel erreicht hast."
+    )
+    start_date = models.DateField(verbose_name="Von")
+    end_date = models.DateField(verbose_name="Bis")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=ON_TRACK)
+    archived = models.BooleanField(default=False)
+    start_value = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Start")
+    current_value = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Stand")
+    target_value = models.DecimalField(max_digits=12, decimal_places=2, default=1, verbose_name="Ziel")
     order = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["-year", "order", "id"]
+        ordering = ["end_date", "order", "id"]
 
     def __str__(self):
-        return f"{self.year}: {self.title}"
+        return self.title
 
     def clean(self):
-        if self.status != self.ARCHIVED:
-            qs = Jahresziel.objects.filter(user=self.user, year=self.year).exclude(status=self.ARCHIVED).exclude(pk=self.pk)
-            if qs.count() >= MAX_JAHRESZIELE_PER_YEAR:
-                raise ValidationError(f"Maximum of {MAX_JAHRESZIELE_PER_YEAR} Jahresziele per year reached.")
+        if self.start_date and self.end_date and self.end_date <= self.start_date:
+            raise ValidationError({"end_date": "Das Enddatum muss nach dem Startdatum liegen."})
+        if not self.archived:
+            qs = Jahresziel.objects.filter(user=self.user, archived=False).exclude(pk=self.pk)
+            if qs.count() >= MAX_JAHRESZIELE:
+                raise ValidationError(f"Maximum of {MAX_JAHRESZIELE} active Jahresziele reached.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    @property
+    def progress_percent(self):
+        span = self.target_value - self.start_value
+        if span == 0:
+            return 100 if self.status == self.ACHIEVED else 0
+        raw = (self.current_value - self.start_value) / span * 100
+        return max(0, min(100, round(raw)))
+
+    @property
+    def time_percent(self):
+        total_days = (self.end_date - self.start_date).days
+        if total_days <= 0:
+            return 100
+        elapsed_days = (timezone.localdate() - self.start_date).days
+        return max(0, min(100, round(elapsed_days / total_days * 100)))
 
 
 class Meilenstein(models.Model):

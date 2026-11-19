@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 from apps.dailydash.models import Day
-from apps.goals.models import Meilenstein, Projekt, ProjectWeekFocus
+from apps.goals.models import Jahresziel, Meilenstein, Projekt, ProjectWeekFocus
 from apps.habits.models import DailyHabitCheck, Habit, WeeklyHabitCheck
 
 from .isoweek_utils import previous_iso_week, week_date_range
@@ -33,7 +33,9 @@ def aggregate_week_data(user, iso_year, iso_week):
         checked = WeeklyHabitCheck.objects.filter(habit=habit, iso_year=iso_year, iso_week=iso_week).exists()
         weekly_summary.append({"habit": habit, "checked": checked})
 
-    meilensteine = Meilenstein.objects.filter(jahresziel__user=user).exclude(jahresziel__status="archived")
+    jahresziele = Jahresziel.objects.filter(user=user, archived=False)
+
+    meilensteine = Meilenstein.objects.filter(jahresziel__user=user, jahresziel__archived=False)
 
     projekte_calendar = Projekt.objects.filter(
         meilenstein__jahresziel__user=user, end_date__isnull=False
@@ -62,6 +64,7 @@ def aggregate_week_data(user, iso_year, iso_week):
         "week_end": end,
         "daily_summary": daily_summary,
         "weekly_summary": weekly_summary,
+        "jahresziele": jahresziele,
         "meilensteine": meilensteine,
         "projekte_calendar": projekte_calendar,
         "projekte_focus_this_week": [p for p in projekte_focus if p.id in focus_this_week],

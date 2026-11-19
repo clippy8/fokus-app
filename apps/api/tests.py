@@ -44,7 +44,16 @@ class ApiCrudRoundtripTests(APITestCase):
 
     def test_jahresziel_create_and_retrieve(self):
         response = self.client.post(
-            "/api/v1/jahresziele/", {"title": "Sportlich werden", "year": 2026}, format="json"
+            "/api/v1/jahresziele/",
+            {
+                "title": "Sportlich werden",
+                "description": "100 Liegestütze am Stück schaffen.",
+                "start_date": "2026-01-01",
+                "end_date": "2026-12-31",
+                "start_value": 0,
+                "target_value": 100,
+            },
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         ziel_id = response.data["id"]

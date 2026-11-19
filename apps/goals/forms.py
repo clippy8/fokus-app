@@ -3,10 +3,43 @@ from django import forms
 from .models import Jahresziel, Meilenstein, Projekt, Todo
 
 
+DATE_WIDGETS = {
+    "start_date": forms.DateInput(attrs={"type": "date"}),
+    "end_date": forms.DateInput(attrs={"type": "date"}),
+}
+
+
 class JahreszielForm(forms.ModelForm):
     class Meta:
         model = Jahresziel
-        fields = ["title", "description", "year"]
+        fields = [
+            "title",
+            "description",
+            "start_date",
+            "end_date",
+            "start_value",
+            "target_value",
+            "current_value",
+            "status",
+        ]
+        widgets = {
+            **DATE_WIDGETS,
+            "description": forms.Textarea(attrs={"rows": 3}),
+        }
+
+
+class OnboardingGoalForm(forms.ModelForm):
+    class Meta:
+        model = Jahresziel
+        fields = ["title", "description", "start_date", "end_date", "start_value", "target_value"]
+        widgets = {
+            **DATE_WIDGETS,
+            "description": forms.Textarea(attrs={"rows": 2}),
+        }
+        labels = {
+            "start_value": "Start",
+            "target_value": "Ziel",
+        }
 
 
 class MeilensteinForm(forms.ModelForm):

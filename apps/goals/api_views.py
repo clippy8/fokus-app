@@ -12,7 +12,7 @@ from .serializers import (
 
 class JahreszielViewSet(viewsets.ModelViewSet):
     serializer_class = JahreszielSerializer
-    filterset_fields = ["year", "status"]
+    filterset_fields = ["status", "archived"]
 
     def get_queryset(self):
         return Jahresziel.objects.filter(user=self.request.user)

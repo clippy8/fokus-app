@@ -27,6 +27,21 @@
 </article>
 
 <article>
+    <h3>Jahresziele — Status &amp; Stand</h3>
+    <ul>
+        {% for ziel in jahresziele %}
+            <li>
+                <strong>{{ ziel.title }}</strong> — {{ ziel.get_status_display }}
+                <br><small>Fortschritt: {{ ziel.progress_percent }}% (Stand {{ ziel.current_value }} von {{ ziel.target_value }}, Start {{ ziel.start_value }}) · Zeit: {{ ziel.time_percent }}% ({{ ziel.start_date }} bis {{ ziel.end_date }})</small>
+                <br><a href="{% url 'goals:jahresziel-edit' pk=ziel.pk %}">Status &amp; Stand aktualisieren</a>
+            </li>
+        {% empty %}
+            <li>Keine Jahresziele definiert.</li>
+        {% endfor %}
+    </ul>
+</article>
+
+<article>
     <h3>Zoom out — Meilenstein-Fortschritt</h3>
     <ul>
         {% for m in meilensteine %}

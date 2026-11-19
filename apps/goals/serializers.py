@@ -5,18 +5,38 @@ from .models import Jahresziel, Meilenstein, ProjectWeekFocus, Projekt, Todo
 
 
 class JahreszielSerializer(serializers.ModelSerializer):
+    progress_percent = serializers.IntegerField(read_only=True)
+    time_percent = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Jahresziel
-        fields = ["id", "title", "description", "year", "status", "order", "created_at", "updated_at"]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "title",
+            "description",
+            "start_date",
+            "end_date",
+            "status",
+            "archived",
+            "start_value",
+            "current_value",
+            "target_value",
+            "progress_percent",
+            "time_percent",
+            "order",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "progress_percent", "time_percent", "created_at", "updated_at"]
 
     def validate(self, attrs):
         merged = {**(self.instance.__dict__ if self.instance else {}), **attrs}
         instance = Jahresziel(
             pk=self.instance.pk if self.instance else None,
             user=self.context["request"].user,
-            year=merged.get("year"),
-            status=merged.get("status", Jahresziel.ACTIVE),
+            start_date=merged.get("start_date"),
+            end_date=merged.get("end_date"),
+            archived=merged.get("archived", False),
         )
         try:
             instance.clean()

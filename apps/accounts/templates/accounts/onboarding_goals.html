@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Deine Jahresziele — Fokus App{% endblock %}
+
+{% block content %}
+<p><small>Schritt 2 — Deine Jahresziele</small></p>
+<h1>Wer möchtest du in einem Jahr sein?</h1>
+
+<article>
+    <p>
+        Lege jetzt genau <strong>drei Jahresziele</strong> fest. Das sind die Ziele, an denen du dich
+        dieses Jahr messen willst — nicht irgendwelche guten Vorsätze, sondern Ziele, bei denen du am
+        Jahresende klar sagen kannst: <em>erreicht</em> oder <em>nicht erreicht</em>.
+    </p>
+    <p>
+        Je konkreter, desto besser. "Fitter werden" ist zu vage — <strong>"100 Liegestütze am Stück
+        schaffen"</strong> oder <strong>"drei Monate am Stück dreimal pro Woche ins Gym gehen"</strong>
+        kannst du dagegen eindeutig überprüfen. Formuliere jedes Ziel so, dass du im Dezember genau weißt,
+        ob du es erreicht hast.
+    </p>
+    <p>Ein paar Beispiele aus verschiedenen Lebensbereichen, zur Inspiration — nicht zum Abschreiben:</p>
+    <ul>
+        <li><strong>Privates &amp; Soziales:</strong> ein Zimmer komplett renovieren, ein Familienfest mit mindestens 20 Gästen organisieren, einen Tanzkurs bis zum Abschluss durchziehen</li>
+        <li><strong>Beruf:</strong> eine Beförderung erreichen, eine Zertifizierung abschließen, in einen neuen Job wechseln</li>
+        <li><strong>Schule &amp; Studium:</strong> einen bestimmten Notenschnitt erreichen, ein Praktikum absolvieren, ein Auslandssemester organisieren</li>
+        <li><strong>Selbständigkeit:</strong> ein Nebenprojekt starten, einen bestimmten Umsatz erreichen</li>
+        <li><strong>Gesundheit:</strong> ein Zielgewicht erreichen und halten, eine sportliche Leistung schaffen</li>
+        <li><strong>Finanzen:</strong> ein Sparziel erreichen, laufende Ausgaben um einen festen Betrag senken</li>
+        <li><strong>Freizeit:</strong> eine neue Sportart bis zu einem bestimmten Level lernen, ein eigenes Projekt öffentlich zeigen</li>
+    </ul>
+    <p>
+        Zu jedem Ziel legst du außerdem fest: <strong>von wann bis wann</strong> es laufen soll (die Dauer
+        bestimmt später, wie viel Zeit prozentual schon vergangen ist), sowie einen messbaren
+        <strong>Start</strong>-, <strong>Stand</strong>- und <strong>Ziel</strong>-Wert — daraus wird dein
+        Fortschritt in Prozent berechnet. Beispiel "Einkommen verdoppeln": Start 1500, Ziel 3000 — dein
+        aktueller Stand wandert von Start Richtung Ziel. Für Ziele ohne Zahl reicht Start 0 und Ziel 1.
+        Status und Stand passt du danach jede Woche im Weekly Review an.
+    </p>
+</article>
+
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}
+        <p style="color: var(--pico-del-color);">{{ formset.non_form_errors|join:", " }}</p>
+    {% endif %}
+    {% for form in formset %}
+        <article>
+            <h3>Ziel {{ forloop.counter }}</h3>
+            {% if form.non_field_errors %}
+                <p style="color: var(--pico-del-color);">{{ form.non_field_errors|join:", " }}</p>
+            {% endif %}
+            {{ form.as_p }}
+        </article>
+    {% endfor %}
+    <button type="submit">Weiter</button>
+</form>
+{% endblock %}

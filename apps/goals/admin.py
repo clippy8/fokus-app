@@ -10,8 +10,8 @@ class MeilensteinInline(admin.TabularInline):
 
 @admin.register(Jahresziel)
 class JahreszielAdmin(admin.ModelAdmin):
-    list_display = ("user", "year", "title", "status")
-    list_filter = ("user", "year", "status")
+    list_display = ("user", "title", "start_date", "end_date", "status", "archived")
+    list_filter = ("user", "status", "archived")
     inlines = [MeilensteinInline]
 
 

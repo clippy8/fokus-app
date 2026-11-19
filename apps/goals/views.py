@@ -11,8 +11,7 @@ from .models import Jahresziel, Meilenstein, ProjectWeekFocus, Projekt, Todo
 @login_required
 def jahresziel_list(request):
     jahresziele = (
-        Jahresziel.objects.filter(user=request.user)
-        .exclude(status=Jahresziel.ARCHIVED)
+        Jahresziel.objects.filter(user=request.user, archived=False)
         .prefetch_related("meilensteine__projekte")
     )
     iso_year, iso_week, _ = timezone.localdate().isocalendar()
@@ -37,7 +36,7 @@ def jahresziel_add(request):
             else:
                 return redirect("goals:list")
     else:
-        form = JahreszielForm(initial={"year": timezone.localdate().year})
+        form = JahreszielForm()
     return render(request, "goals/jahresziel_form.html", {"form": form})
 
 
@@ -62,7 +61,7 @@ def jahresziel_edit(request, pk):
 @login_required
 def jahresziel_archive(request, pk):
     ziel = get_object_or_404(Jahresziel, pk=pk, user=request.user)
-    ziel.status = Jahresziel.ARCHIVED
+    ziel.archived = True
     ziel.save()
     return redirect("goals:list")
 

@@ -4,19 +4,24 @@
 
 {% block content %}
 <h1>Jahresziele</h1>
-<p><a href="{% url 'goals:jahresziel-add' %}" role="button">+ Neues Jahresziel</a> <small>(max. 3 nicht-archivierte pro Jahr)</small></p>
+<p><a href="{% url 'goals:jahresziel-add' %}" role="button">+ Neues Jahresziel</a> <small>(max. 3 aktive)</small></p>
 
 {% for ziel in jahresziele %}
 <article>
     <header>
-        <strong>{{ ziel.year }}: {{ ziel.title }}</strong>
+        <strong>{{ ziel.title }}</strong> — {{ ziel.get_status_display }}
         <a href="{% url 'goals:jahresziel-edit' pk=ziel.pk %}">Bearbeiten</a>
         <form method="post" action="{% url 'goals:jahresziel-archive' pk=ziel.pk %}" style="display:inline;">
             {% csrf_token %}
             <button type="submit" class="secondary">Archivieren</button>
         </form>
     </header>
-    {% if ziel.description %}<p>{{ ziel.description }}</p>{% endif %}
+    <p>{{ ziel.description }}</p>
+    <div class="progress-bar"><span style="width: {{ ziel.progress_percent }}%;"></span></div>
+    <small>
+        Fortschritt: {{ ziel.progress_percent }}% (Stand {{ ziel.current_value }} / Ziel {{ ziel.target_value }}, Start {{ ziel.start_value }})
+        · Zeit: {{ ziel.time_percent }}% ({{ ziel.start_date }} bis {{ ziel.end_date }})
+    </small>
 
     {% for meilenstein in ziel.meilensteine.all %}
         <div style="margin-left: 1.5rem;">
