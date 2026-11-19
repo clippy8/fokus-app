@@ -54,16 +54,17 @@ class OnboardingProfileViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
 
-    def test_fills_in_height_and_weight(self):
+    def test_fills_in_height_weight_and_calorie_goal(self):
         response = self.client.post(
             reverse("accounts:onboarding-profile"),
-            {"groesse_cm": "180", "gewicht_kg": "75.5"},
+            {"groesse_cm": "180", "gewicht_kg": "75.5", "kalorienziel_kcal": "2400"},
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("dailydash:today"))
         self.user.profile.refresh_from_db()
         self.assertEqual(self.user.profile.groesse_cm, 180)
         self.assertEqual(str(self.user.profile.gewicht_kg), "75.50")
+        self.assertEqual(self.user.profile.kalorienziel_kcal, 2400)
 
     def test_can_be_skipped_without_data(self):
         response = self.client.post(reverse("accounts:onboarding-profile"), {"skip": "1"})

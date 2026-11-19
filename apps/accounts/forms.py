@@ -18,8 +18,9 @@ class RegisterForm(UserCreationForm):
 class OnboardingProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ["groesse_cm", "gewicht_kg"]
+        fields = ["groesse_cm", "gewicht_kg", "kalorienziel_kcal"]
         labels = {
             "groesse_cm": "Größe (cm)",
             "gewicht_kg": "Gewicht (kg)",
+            "kalorienziel_kcal": "Tägliches Kalorienziel (kcal)",
         }

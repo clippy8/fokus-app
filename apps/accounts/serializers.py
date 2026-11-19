@@ -10,7 +10,15 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["username", "first_name", "last_name", "geburtstag", "groesse_cm", "gewicht_kg"]
+        fields = [
+            "username",
+            "first_name",
+            "last_name",
+            "geburtstag",
+            "groesse_cm",
+            "gewicht_kg",
+            "kalorienziel_kcal",
+        ]
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop("user", {})
