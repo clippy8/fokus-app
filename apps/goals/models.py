@@ -129,26 +129,38 @@ class Meilenstein(models.Model):
 
 
 class Projekt(models.Model):
-    IDEA = "idea"
+    NOT_STARTED = "not_started"
+    ON_HOLD = "on_hold"
     ACTIVE = "active"
-    PAUSED = "paused"
-    DONE = "done"
-    ARCHIVED = "archived"
+    COMPLETED = "completed"
+    ABANDONED = "abandoned"
     STATUS_CHOICES = [
-        (IDEA, "Idea"),
-        (ACTIVE, "Active"),
-        (PAUSED, "Paused"),
-        (DONE, "Done"),
-        (ARCHIVED, "Archived"),
+        (NOT_STARTED, "Nicht begonnen"),
+        (ON_HOLD, "Pausiert"),
+        (ACTIVE, "Aktiv"),
+        (COMPLETED, "Abgeschlossen"),
+        (ABANDONED, "Verworfen"),
     ]
 
     meilenstein = models.ForeignKey(Meilenstein, on_delete=models.CASCADE, related_name="projekte")
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    next_step = models.CharField(max_length=255, blank=True, verbose_name="Nächster Schritt")
+    description = models.TextField(
+        blank=True,
+        verbose_name="Beschreibung",
+        help_text="Welche einzelnen Schritte sind für dieses Projekt nötig?",
+    )
+    next_step = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Nächste Aktion",
+        help_text=(
+            "Ein ganz kleinschrittiges nächstes To-do, z. B. „Trainingsplan-Vorlage googeln“ statt "
+            "„Trainingsplan erstellen“."
+        ),
+    )
     start_date = models.DateField(null=True, blank=True, verbose_name="Von")
     end_date = models.DateField(null=True, blank=True, verbose_name="Bis")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=IDEA)
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default=NOT_STARTED)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

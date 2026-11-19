@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Projekte — Zeitstrahl — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Projekte — Zeitstrahl</h1>
+<article>
+    <p>
+        Ziehe eine Projektidee aus <strong>„Noch nicht eingeplant“</strong> auf den Zeitstrahl, um Von und
+        Bis festzulegen. Bereits eingeplante Projekte kannst du direkt verschieben oder an den Rändern
+        ziehen, um Start bzw. Ende zu ändern. Überlappungen mehrerer Projekte sind ausdrücklich erlaubt.
+        Du kannst Von/Bis auch jederzeit manuell eintragen — beides bleibt synchron.
+    </p>
+</article>
+
+<section id="unscheduled-tray">
+    <h3>Noch nicht eingeplant</h3>
+    <div id="tray-items">
+        {% for p in unscheduled %}
+            <div class="tray-item" draggable="true" data-id="{{ p.id }}">{{ p.title }}</div>
+        {% empty %}
+            <p><small>Alle Projekte sind eingeplant.</small></p>
+        {% endfor %}
+    </div>
+</section>
+
+<section
+    id="timeline"
+    data-window-start="{{ window_start|date:'Y-m-d' }}"
+    data-total-days="{{ total_days }}"
+    data-px-per-day="{{ px_per_day }}"
+    data-default-duration="{{ default_duration_days }}"
+>
+    <div id="timeline-scroll">
+        <div id="timeline-header">
+            <div class="timeline-header-spacer"></div>
+            <div class="timeline-header-dates" style="width: {{ timeline_width_px }}px;">
+                {% for m in months %}
+                    <div class="month-label" style="left: {{ m.left_px }}px;">{{ m.label }}</div>
+                {% endfor %}
+                <div class="today-marker" style="left: {{ today_left_px }}px;"></div>
+            </div>
+        </div>
+        <div id="timeline-rows">
+            {% for bar in bars %}
+                {% include "goals/_timeline_row.html" %}
+            {% empty %}
+                <p><small>Noch keine eingeplanten Projekte — ziehe eins aus der Liste oben hierher.</small></p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<template id="row-template">
+    {% include "goals/_timeline_row_template.html" %}
+</template>
+
+<script src="{% static 'js/projekt_timeline.js' %}"></script>
+{% endblock %}

@@ -3,9 +3,15 @@ from django import forms
 from .models import Jahresziel, Meilenstein, Projekt, Todo
 
 
+# HTML5 <input type="date"> requires the value attribute in ISO format (YYYY-MM-DD)
+# regardless of UI locale. Without an explicit format, Django renders the value in the
+# active locale's date format (e.g. German DD.MM.YYYY) when pre-filling an existing
+# instance, which the browser then can't parse — the field silently shows up empty.
+ISO_DATE_FORMAT = "%Y-%m-%d"
+
 DATE_WIDGETS = {
-    "start_date": forms.DateInput(attrs={"type": "date"}),
-    "end_date": forms.DateInput(attrs={"type": "date"}),
+    "start_date": forms.DateInput(attrs={"type": "date"}, format=ISO_DATE_FORMAT),
+    "end_date": forms.DateInput(attrs={"type": "date"}, format=ISO_DATE_FORMAT),
 }
 
 
@@ -62,7 +68,7 @@ class MeilensteinForm(forms.ModelForm):
             "status",
         ]
         widgets = {
-            "deadline": forms.DateInput(attrs={"type": "date"}),
+            "deadline": forms.DateInput(attrs={"type": "date"}, format=ISO_DATE_FORMAT),
             "description": forms.Textarea(attrs={"rows": 3}),
         }
 
@@ -73,7 +79,7 @@ class OnboardingMeilensteinForm(forms.ModelForm):
         fields = ["title", "description", "deadline", "start_value", "target_value"]
         widgets = {
             "title": title_input_widget("Name des Meilensteins", "Name des Meilensteins"),
-            "deadline": forms.DateInput(attrs={"type": "date"}),
+            "deadline": forms.DateInput(attrs={"type": "date"}, format=ISO_DATE_FORMAT),
             "description": forms.Textarea(attrs={"rows": 2}),
         }
         labels = {

@@ -33,3 +33,158 @@
     border-bottom-color: var(--pico-primary);
     box-shadow: none;
 }
+
+/* Projekt-Zeitstrahl */
+#unscheduled-tray {
+    border: 1px dashed var(--pico-muted-border-color);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+}
+
+#tray-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tray-item {
+    cursor: grab;
+    border: 1px solid var(--pico-primary);
+    border-radius: 6px;
+    padding: 0.35rem 0.75rem;
+    background: var(--pico-primary-background, transparent);
+    user-select: none;
+}
+
+#timeline-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 6px;
+}
+
+#timeline-header {
+    display: grid;
+    grid-template-columns: 220px max-content;
+    height: 2rem;
+    border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.timeline-header-spacer {
+    position: sticky;
+    left: 0;
+    background: var(--pico-background-color, Canvas);
+    z-index: 2;
+}
+
+.timeline-header-dates {
+    position: relative;
+}
+
+.month-label {
+    position: absolute;
+    top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--pico-muted-color);
+    border-left: 1px solid var(--pico-muted-border-color);
+    padding-left: 0.25rem;
+    height: 100%;
+}
+
+.today-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--pico-del-color);
+}
+
+#timeline-rows {
+    position: relative;
+}
+
+.timeline-row {
+    display: grid;
+    grid-template-columns: 220px max-content;
+    align-items: center;
+    border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.timeline-label {
+    position: sticky;
+    left: 0;
+    background: var(--pico-background-color, Canvas);
+    z-index: 2;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.timeline-track {
+    position: relative;
+    height: 2.75rem;
+}
+
+.timeline-bar {
+    position: absolute;
+    top: 0.4rem;
+    height: 2rem;
+    border-radius: 4px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    color: #fff;
+    min-width: 8px;
+}
+
+.timeline-bar.status-not_started { background: #6c757d; }
+.timeline-bar.status-on_hold { background: #e0a800; }
+.timeline-bar.status-active { background: #2563eb; }
+.timeline-bar.status-completed { background: #16a34a; }
+.timeline-bar.status-abandoned { background: #9ca3af; text-decoration: line-through; }
+
+.status-badge {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    color: #fff;
+    white-space: nowrap;
+}
+.status-badge.status-not_started { background: #6c757d; }
+.status-badge.status-on_hold { background: #e0a800; }
+.status-badge.status-active { background: #2563eb; }
+.status-badge.status-completed { background: #16a34a; }
+.status-badge.status-abandoned { background: #9ca3af; }
+
+.bar-label {
+    padding: 0 0.5rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+.resize-handle {
+    width: 8px;
+    height: 100%;
+    cursor: ew-resize;
+    flex-shrink: 0;
+}
+
+.manual-dates {
+    display: none;
+}
+
+.timeline-row:hover .manual-dates,
+.timeline-row:focus-within .manual-dates {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    grid-column: 1 / -1;
+    padding: 0.25rem 0.5rem 0.5rem;
+    font-size: 0.8rem;
+}

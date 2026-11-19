@@ -1,0 +1,25 @@
+<div class="timeline-row" data-row-id="{{ bar.projekt.id }}">
+    <div class="timeline-label">
+        <strong>{{ bar.projekt.title }}</strong>
+        <span class="status-badge status-{{ bar.projekt.status }}">{{ bar.projekt.get_status_display }}</span>
+    </div>
+    <div class="timeline-track" style="width: {{ timeline_width_px }}px;">
+        <div
+            class="timeline-bar status-{{ bar.projekt.status }}"
+            draggable="true"
+            data-id="{{ bar.projekt.id }}"
+            data-start="{{ bar.projekt.start_date|date:'Y-m-d' }}"
+            data-end="{{ bar.projekt.end_date|date:'Y-m-d' }}"
+            style="left: {{ bar.left_px }}px; width: {{ bar.width_px }}px;"
+        >
+            <span class="resize-handle resize-left"></span>
+            <span class="bar-label">{{ bar.projekt.title }}</span>
+            <span class="resize-handle resize-right"></span>
+        </div>
+    </div>
+    <div class="manual-dates" data-id="{{ bar.projekt.id }}">
+        <label>Von <input type="date" class="manual-start" value="{{ bar.projekt.start_date|date:'Y-m-d' }}"></label>
+        <label>Bis <input type="date" class="manual-end" value="{{ bar.projekt.end_date|date:'Y-m-d' }}"></label>
+        <a class="edit-link" href="{% url 'goals:projekt-edit' pk=bar.projekt.id %}">Bearbeiten</a>
+    </div>
+</div>

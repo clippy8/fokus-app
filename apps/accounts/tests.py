@@ -296,7 +296,7 @@ class OnboardingProjekteViewTests(TestCase):
         projekte = Projekt.objects.filter(meilenstein=self.meilenstein)
         self.assertEqual(projekte.count(), 5)
         for p in projekte:
-            self.assertEqual(p.status, Projekt.IDEA)
+            self.assertEqual(p.status, Projekt.NOT_STARTED)
 
     def test_revisit_prefills_existing_ideas_and_allows_deletion(self):
         p1 = Projekt.objects.create(meilenstein=self.meilenstein, title="Bestehende Idee")

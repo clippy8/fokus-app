@@ -39,7 +39,7 @@ def aggregate_week_data(user, iso_year, iso_week):
 
     projekte_calendar = Projekt.objects.filter(
         meilenstein__jahresziel__user=user, end_date__isnull=False
-    ).exclude(status=Projekt.ARCHIVED).order_by("end_date")
+    ).exclude(status=Projekt.ABANDONED).order_by("end_date")
 
     focus_this_week = set(
         Projekt.objects.filter(
