@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Finanzen — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Finanzen</h1>
+
+<div class="grid">
+    <article>
+        <h3>Einnahmen</h3>
+        <p>{{ total_einnahmen|floatformat:2 }} €</p>
+    </article>
+    <article>
+        <h3>Ausgaben</h3>
+        <p>{{ total_ausgaben|floatformat:2 }} €</p>
+    </article>
+    <article>
+        <h3>Saldo</h3>
+        <p>{{ saldo|floatformat:2 }} €</p>
+    </article>
+</div>
+
+<p><a href="{% url 'finanzen:add' %}" role="button">+ Eintrag hinzufügen</a></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Zeit</th>
+            <th>Name</th>
+            <th>Tag</th>
+            <th>Kategorie</th>
+            <th>Betrag</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+        <tr>
+            <td>{{ entry.timestamp }}</td>
+            <td>{{ entry.name }}</td>
+            <td>{{ entry.tag|default:"—" }}</td>
+            <td>{{ entry.get_category_display }}</td>
+            <td>{{ entry.amount }} €</td>
+            <td>
+                <a href="{% url 'finanzen:edit' pk=entry.pk %}">Bearbeiten</a>
+                <form method="post" action="{% url 'finanzen:delete' pk=entry.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary">Löschen</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">Noch keine Einträge.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
