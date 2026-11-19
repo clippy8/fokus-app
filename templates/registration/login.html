@@ -17,5 +17,6 @@
         <input type="hidden" name="next" value="{{ next }}">
         <button type="submit">Einloggen</button>
     </form>
+    <p><small>Noch kein Konto? <a href="{% url 'accounts:register' %}">Jetzt registrieren</a>.</small></p>
 </article>
 {% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Registrieren — Fokus App{% endblock %}
+
+{% block content %}
+<article style="max-width: 480px; margin: 2rem auto;">
+    <h1>Registrieren</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Konto erstellen</button>
+    </form>
+    <p><small>Schon registriert? <a href="{% url 'login' %}">Hier einloggen</a>.</small></p>
+</article>
+{% endblock %}

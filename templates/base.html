@@ -32,6 +32,11 @@
                     </form>
                 </li>
             </ul>
+            {% else %}
+            <ul>
+                <li><a href="{% url 'login' %}" role="button" class="secondary">Login</a></li>
+                <li><a href="{% url 'accounts:register' %}" role="button">Registrieren</a></li>
+            </ul>
             {% endif %}
         </nav>
     </header>
