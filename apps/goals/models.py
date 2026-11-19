@@ -22,6 +22,7 @@ class Jahresziel(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="jahresziele")
     title = models.CharField(max_length=255)
     description = models.TextField(
+        verbose_name="Beschreibung",
         help_text=(
             "Mach den Titel konkret: Woran erkennst du eindeutig, dass du das Ziel erreicht hast? "
             "Beispiel bei Titel „Sportlich werden“: „100 Liegestütze am Stück schaffen“ oder "

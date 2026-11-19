@@ -19,6 +19,13 @@ JahreszielFormSet = formset_factory(
     OnboardingGoalForm, extra=3, min_num=3, max_num=3, validate_min=True, validate_max=True
 )
 
+GOAL_TITLE_EXAMPLES = ["Sportlich werden", "Einkommen verdoppeln", "Eigene App veröffentlichen"]
+
+
+def _apply_example_placeholders(formset):
+    for form, example in zip(formset.forms, GOAL_TITLE_EXAMPLES):
+        form.fields["title"].widget.attrs["placeholder"] = f"Titel, z. B. „{example}“"
+
 
 def register(request):
     if request.user.is_authenticated:
@@ -68,4 +75,5 @@ def onboarding_goals(request):
             return redirect(NEXT_AFTER_ONBOARDING_GOALS)
     else:
         formset = JahreszielFormSet(prefix="goal")
+    _apply_example_placeholders(formset)
     return render(request, "accounts/onboarding_goals.html", {"formset": formset})
