@@ -9,6 +9,12 @@ DATE_WIDGETS = {
 }
 
 
+def title_input_widget(placeholder, aria_label):
+    return forms.TextInput(
+        attrs={"class": "goal-title-input", "placeholder": placeholder, "aria-label": aria_label}
+    )
+
+
 class JahreszielForm(forms.ModelForm):
     class Meta:
         model = Jahresziel
@@ -33,13 +39,7 @@ class OnboardingGoalForm(forms.ModelForm):
         model = Jahresziel
         fields = ["title", "description", "start_date", "end_date", "start_value", "target_value"]
         widgets = {
-            "title": forms.TextInput(
-                attrs={
-                    "class": "goal-title-input",
-                    "placeholder": "Titel, z. B. „Sportlich werden“",
-                    "aria-label": "Titel des Ziels",
-                }
-            ),
+            "title": title_input_widget("Titel, z. B. „Sportlich werden“", "Titel des Ziels"),
             **DATE_WIDGETS,
             "description": forms.Textarea(attrs={"rows": 2}),
         }
@@ -52,7 +52,34 @@ class OnboardingGoalForm(forms.ModelForm):
 class MeilensteinForm(forms.ModelForm):
     class Meta:
         model = Meilenstein
-        fields = ["title", "target_date"]
+        fields = [
+            "title",
+            "description",
+            "deadline",
+            "start_value",
+            "target_value",
+            "current_value",
+            "status",
+        ]
+        widgets = {
+            "deadline": forms.DateInput(attrs={"type": "date"}),
+            "description": forms.Textarea(attrs={"rows": 3}),
+        }
+
+
+class OnboardingMeilensteinForm(forms.ModelForm):
+    class Meta:
+        model = Meilenstein
+        fields = ["title", "description", "deadline", "start_value", "target_value"]
+        widgets = {
+            "title": title_input_widget("Name des Meilensteins", "Name des Meilensteins"),
+            "deadline": forms.DateInput(attrs={"type": "date"}),
+            "description": forms.Textarea(attrs={"rows": 2}),
+        }
+        labels = {
+            "start_value": "Start",
+            "target_value": "Ziel",
+        }
 
 
 class ProjektForm(forms.ModelForm):

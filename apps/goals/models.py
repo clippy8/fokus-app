@@ -76,22 +76,36 @@ class Jahresziel(models.Model):
 
 
 class Meilenstein(models.Model):
-    OPEN = "open"
-    DONE = "done"
+    ON_TRACK = "on_track"
+    OFF_TRACK = "off_track"
+    NOT_STARTED = "not_started"
+    AT_RISK = "at_risk"
     STATUS_CHOICES = [
-        (OPEN, "Open"),
-        (DONE, "Done"),
+        (ON_TRACK, "On Track"),
+        (OFF_TRACK, "Off Track"),
+        (NOT_STARTED, "Not Started"),
+        (AT_RISK, "At Risk"),
     ]
 
     jahresziel = models.ForeignKey(Jahresziel, on_delete=models.CASCADE, related_name="meilensteine")
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, verbose_name="Name")
+    description = models.TextField(
+        verbose_name="Beschreibung",
+        help_text=(
+            "Ein Meilenstein ist ein qualitativer Key Result, das dieses Jahresziel herunterbricht "
+            "(wie bei OKRs). Beschreibe, woran du erkennst, dass dieser Meilenstein erreicht ist."
+        ),
+    )
+    deadline = models.DateField(verbose_name="Deadline")
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default=NOT_STARTED)
+    start_value = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Start")
+    current_value = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Stand")
+    target_value = models.DecimalField(max_digits=12, decimal_places=2, default=1, verbose_name="Ziel")
     order = models.PositiveSmallIntegerField(default=0)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=OPEN)
-    target_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["order", "id"]
+        ordering = ["deadline", "order", "id"]
 
     def __str__(self):
         return self.title
@@ -107,11 +121,11 @@ class Meilenstein(models.Model):
 
     @property
     def progress_percent(self):
-        total = self.projekte.count()
-        if not total:
-            return 0
-        done = self.projekte.filter(status=Projekt.DONE).count()
-        return round(100 * done / total)
+        span = self.target_value - self.start_value
+        if span == 0:
+            return 100 if self.current_value >= self.target_value else 0
+        raw = (self.current_value - self.start_value) / span * 100
+        return max(0, min(100, round(raw)))
 
 
 class Projekt(models.Model):

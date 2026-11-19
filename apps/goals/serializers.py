@@ -50,7 +50,20 @@ class MeilensteinSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meilenstein
-        fields = ["id", "jahresziel", "title", "order", "status", "target_date", "progress_percent", "created_at"]
+        fields = [
+            "id",
+            "jahresziel",
+            "title",
+            "description",
+            "deadline",
+            "status",
+            "start_value",
+            "current_value",
+            "target_value",
+            "progress_percent",
+            "order",
+            "created_at",
+        ]
         read_only_fields = ["id", "progress_percent", "created_at"]
 
     def validate(self, attrs):

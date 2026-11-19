@@ -22,7 +22,7 @@ class ProjektInline(admin.TabularInline):
 
 @admin.register(Meilenstein)
 class MeilensteinAdmin(admin.ModelAdmin):
-    list_display = ("jahresziel", "title", "status", "target_date")
+    list_display = ("jahresziel", "title", "status", "deadline")
     list_filter = ("jahresziel", "status")
     inlines = [ProjektInline]
 

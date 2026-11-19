@@ -21,6 +21,18 @@ def make_ziel(user, title, **overrides):
     return Jahresziel.objects.create(**defaults)
 
 
+def make_meilenstein(jahresziel, title, **overrides):
+    today = timezone.localdate()
+    defaults = {
+        "jahresziel": jahresziel,
+        "title": title,
+        "description": "Konkrete Beschreibung des Meilensteins.",
+        "deadline": today + timedelta(days=100),
+    }
+    defaults.update(overrides)
+    return Meilenstein.objects.create(**defaults)
+
+
 class JahreszielLimitTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="alice", password="pw")
@@ -79,30 +91,38 @@ class MeilensteinLimitTests(TestCase):
 
     def test_max_3_per_jahresziel(self):
         for i in range(3):
-            Meilenstein.objects.create(jahresziel=self.ziel, title=f"M{i}")
+            make_meilenstein(self.ziel, f"M{i}")
         with self.assertRaises(ValidationError):
-            Meilenstein.objects.create(jahresziel=self.ziel, title="M4")
+            make_meilenstein(self.ziel, "M4")
 
-    def test_progress_percent(self):
-        meilenstein = Meilenstein.objects.create(jahresziel=self.ziel, title="M1")
-        for i in range(4):
-            Projekt.objects.create(meilenstein=meilenstein, title=f"P{i}")
-        done_projekte = meilenstein.projekte.all()[:2]
-        for p in done_projekte:
-            p.status = Projekt.DONE
-            p.save()
+    def test_default_status_is_not_started(self):
+        meilenstein = make_meilenstein(self.ziel, "M1")
+        self.assertEqual(meilenstein.status, Meilenstein.NOT_STARTED)
+
+
+class MeilensteinProgressTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="alice", password="pw")
+        self.ziel = make_ziel(self.user, "Ziel")
+
+    def test_progress_percent_uses_start_stand_target(self):
+        meilenstein = make_meilenstein(self.ziel, "M1", start_value=0, current_value=5, target_value=10)
         self.assertEqual(meilenstein.progress_percent, 50)
 
-    def test_progress_percent_no_projects(self):
-        meilenstein = Meilenstein.objects.create(jahresziel=self.ziel, title="M1")
-        self.assertEqual(meilenstein.progress_percent, 0)
+    def test_progress_percent_clamped_to_100(self):
+        meilenstein = make_meilenstein(self.ziel, "M1", start_value=0, current_value=15, target_value=10)
+        self.assertEqual(meilenstein.progress_percent, 100)
+
+    def test_progress_percent_zero_span(self):
+        meilenstein = make_meilenstein(self.ziel, "M1", start_value=5, current_value=5, target_value=5)
+        self.assertEqual(meilenstein.progress_percent, 100)
 
 
 class ProjectWeekFocusTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="alice", password="pw")
         ziel = make_ziel(self.user, "Ziel")
-        self.meilenstein = Meilenstein.objects.create(jahresziel=ziel, title="M1")
+        self.meilenstein = make_meilenstein(ziel, "M1")
         self.projekt = Projekt.objects.create(meilenstein=self.meilenstein, title="P1")
 
     def test_focused_this_week_vs_last_week(self):

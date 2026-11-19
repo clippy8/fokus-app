@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Deine Meilensteine — Fokus App{% endblock %}
+
+{% block content %}
+<p><small>Schritt 3 — Deine Meilensteine</small></p>
+<h1>Wie kommst du dorthin?</h1>
+
+<article>
+    <p>
+        Brich jetzt jedes deiner drei Jahresziele in genau <strong>drei Meilensteine</strong> herunter —
+        angelehnt an OKRs (Objectives &amp; Key Results), wie sie z. B. bei Google verwendet werden: dein
+        Jahresziel ist das <em>Objective</em>, die drei Meilensteine sind die qualitativen <em>Key
+        Results</em> dazu.
+    </p>
+    <p>
+        Die Meilensteine müssen nicht chronologisch aufeinander folgen — sie können auch parallel
+        laufen. Genau wie beim Jahresziel legst du pro Meilenstein eine <strong>Deadline</strong> sowie
+        einen messbaren <strong>Start</strong>-, <strong>Stand</strong>- und <strong>Ziel</strong>-Wert
+        fest. Später brichst du jeden Meilenstein wiederum in Projekte herunter.
+    </p>
+</article>
+
+<form method="post">
+    {% csrf_token %}
+    {% for section in sections %}
+        <section>
+            <h2>{{ section.ziel.title }}</h2>
+            <p>{{ section.ziel.description }}</p>
+
+            {{ section.formset.management_form }}
+            {% if section.formset.non_form_errors %}
+                <p style="color: var(--pico-del-color);">{{ section.formset.non_form_errors|join:", " }}</p>
+            {% endif %}
+
+            {% for form in section.formset %}
+                <article>
+                    {% if form.non_field_errors %}
+                        <p style="color: var(--pico-del-color);">{{ form.non_field_errors|join:", " }}</p>
+                    {% endif %}
+
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <p style="color: var(--pico-del-color);">{{ form.title.errors|join:", " }}</p>
+                    {% endif %}
+
+                    <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                    {{ form.description }}
+                    {% if form.description.help_text %}<small>{{ form.description.help_text }}</small>{% endif %}
+                    {{ form.description.errors }}
+
+                    <div class="grid">
+                        <label for="{{ form.deadline.id_for_label }}">{{ form.deadline.label }}{{ form.deadline }}</label>
+                    </div>
+                    {{ form.deadline.errors }}
+
+                    <div class="grid">
+                        <label for="{{ form.start_value.id_for_label }}">{{ form.start_value.label }}{{ form.start_value }}</label>
+                        <label for="{{ form.target_value.id_for_label }}">{{ form.target_value.label }}{{ form.target_value }}</label>
+                    </div>
+                    {{ form.start_value.errors }}{{ form.target_value.errors }}
+                </article>
+            {% endfor %}
+        </section>
+    {% endfor %}
+    <button type="submit">Weiter</button>
+</form>
+{% endblock %}

@@ -26,12 +26,15 @@
     {% for meilenstein in ziel.meilensteine.all %}
         <div style="margin-left: 1.5rem;">
             <h4>
-                {{ meilenstein.title }}
-                {% if meilenstein.target_date %}<small>(bis {{ meilenstein.target_date }})</small>{% endif %}
+                {{ meilenstein.title }} — {{ meilenstein.get_status_display }}
+                <small>(bis {{ meilenstein.deadline }})</small>
                 <a href="{% url 'goals:meilenstein-edit' pk=meilenstein.pk %}">Bearbeiten</a>
             </h4>
+            <p>{{ meilenstein.description }}</p>
             <div class="progress-bar"><span style="width: {{ meilenstein.progress_percent }}%;"></span></div>
-            <small>{{ meilenstein.progress_percent }}% der Projekte erledigt</small>
+            <small>
+                Fortschritt: {{ meilenstein.progress_percent }}% (Stand {{ meilenstein.current_value }} / Ziel {{ meilenstein.target_value }}, Start {{ meilenstein.start_value }})
+            </small>
 
             <ul>
                 {% for projekt in meilenstein.projekte.all %}
