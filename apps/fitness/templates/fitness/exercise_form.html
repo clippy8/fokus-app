@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Übung — Fokus App{% endblock %}
+
+{% block content %}
+<p><small>{% if exercise %}Übung bearbeiten{% else %}Neue Übung{% endif %}</small></p>
+{% if form.non_field_errors %}
+    <p style="color: var(--pico-del-color);">{{ form.non_field_errors|join:", " }}</p>
+{% endif %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.name }}
+    {{ form.name.errors }}
+
+    {% if exercise.image %}
+    <img src="{{ exercise.image.url }}" alt="{{ exercise.name }}" style="max-height: 200px; display: block; margin-bottom: 1rem;">
+    {% endif %}
+
+    {% for field in form %}
+        {% if field.name != "name" %}
+        <p>
+            {{ field.label_tag }}
+            {{ field }}
+            {{ field.errors }}
+        </p>
+        {% endif %}
+    {% endfor %}
+
+    <button type="submit">Speichern</button>
+    <a href="{% url 'fitness:exercise-list' %}" role="button" class="secondary">Abbrechen</a>
+</form>
+{% endblock %}

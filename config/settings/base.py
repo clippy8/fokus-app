@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "apps.habits",
     "apps.goals",
     "apps.reviews",
+    "apps.fitness",
     "apps.api",
 ]
 
@@ -78,6 +79,9 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

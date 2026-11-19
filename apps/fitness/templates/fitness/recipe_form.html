@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Rezept — Fokus App{% endblock %}
+
+{% block content %}
+<h1>{% if recipe %}Rezept bearbeiten{% else %}Neues Rezept{% endif %}</h1>
+{% if form.non_field_errors %}
+    <p style="color: var(--pico-del-color);">{{ form.non_field_errors|join:", " }}</p>
+{% endif %}
+{% if recipe.image %}
+<img src="{{ recipe.image.url }}" alt="{{ recipe.name }}" style="max-height: 200px;">
+{% endif %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Speichern</button>
+    <a href="{% url 'fitness:recipe-list' %}" role="button" class="secondary">Abbrechen</a>
+</form>
+{% endblock %}

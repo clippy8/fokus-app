@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Essen {{ day.date }} — Fokus App{% endblock %}
+
+{% block content %}
+<nav aria-label="Tagesnavigation">
+    <ul>
+        <li><a href="{% url 'fitness:food-day' date=prev_date %}">&larr; Vorheriger Tag</a></li>
+    </ul>
+    <ul>
+        <li><strong>{{ day.date }}{% if is_today %} (heute){% endif %}</strong></li>
+    </ul>
+    <ul>
+        <li><a href="{% url 'fitness:food-day' date=next_date %}">N&auml;chster Tag &rarr;</a></li>
+    </ul>
+</nav>
+
+<h1>Essen — {{ day.date }}</h1>
+<p><a href="{% url 'fitness:food-entry-add' date=date %}" role="button">+ Eintrag hinzufügen</a></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Rezept</th>
+            <th>Menge (g)</th>
+            <th>Kalorien (kcal)</th>
+            <th>Protein (g)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+        <tr>
+            <td>{{ entry.name }}</td>
+            <td>{% if entry.recipe %}{{ entry.recipe.name }}{% else %}—{% endif %}</td>
+            <td>{{ entry.amount_g|default:"—" }}</td>
+            <td>{{ entry.calories_kcal|default:"—" }}</td>
+            <td>{{ entry.protein_g|default:"—" }}</td>
+            <td>
+                <a href="{% url 'fitness:food-entry-edit' pk=entry.pk %}">Bearbeiten</a>
+                <form method="post" action="{% url 'fitness:food-entry-delete' pk=entry.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary">Löschen</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">Noch keine Einträge für diesen Tag.</td></tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>Summe</th>
+            <th></th>
+            <th></th>
+            <th>{{ totals.total_calories|default:0 }}</th>
+            <th>{{ totals.total_protein|default:0 }}</th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+{% endblock %}

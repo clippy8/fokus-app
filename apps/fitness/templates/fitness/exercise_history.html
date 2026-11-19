@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}{{ exercise.name }} — Verlauf — Fokus App{% endblock %}
+
+{% block content %}
+<h1>{{ exercise.name }} — Verlauf</h1>
+<p><a href="{% url 'fitness:exercise-list' %}">&larr; Zurück zu den Übungen</a></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Satz</th>
+            <th>Wiederholungen</th>
+            <th>Gewicht (kg)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for set in sets %}
+        <tr>
+            <td><a href="{% url 'fitness:workout-day' date=set.day.date|date:'Y-m-d' %}">{{ set.day.date }}</a></td>
+            <td>{{ set.set_number }}</td>
+            <td>{{ set.reps }}</td>
+            <td>{{ set.weight_kg|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Noch keine Sätze für diese Übung erfasst.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

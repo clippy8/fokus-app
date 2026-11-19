@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Fitness — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Fitness</h1>
+
+<div class="grid">
+    <article>
+        <h3>Training</h3>
+        <p>Heutiges Training eintragen und frühere Sätze pro Übung vergleichen.</p>
+        <a href="{% url 'fitness:workout-day' date=today %}" role="button">Training heute</a>
+        <a href="{% url 'fitness:exercise-list' %}" role="button" class="secondary">Übungen verwalten</a>
+    </article>
+    <article>
+        <h3>Ernährung</h3>
+        <p>Kalorien und Proteine tracken, optional mit Rezept verknüpft.</p>
+        <a href="{% url 'fitness:food-day' date=today %}" role="button">Essen heute</a>
+        <a href="{% url 'fitness:recipe-list' %}" role="button" class="secondary">Rezepte verwalten</a>
+    </article>
+</div>
+{% endblock %}

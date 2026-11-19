@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Rezepte — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Rezepte</h1>
+<p><a href="{% url 'fitness:recipe-add' %}" role="button">+ Neues Rezept</a></p>
+
+<div class="grid">
+    {% for recipe in recipes %}
+    <article>
+        {% if recipe.image %}
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.name }}" style="max-height: 150px; object-fit: cover;">
+        {% endif %}
+        <h4>{{ recipe.name }}</h4>
+        <p>
+            {% if recipe.calories_kcal_per_100g %}{{ recipe.calories_kcal_per_100g }} kcal{% endif %}
+            {% if recipe.protein_g_per_100g %} · {{ recipe.protein_g_per_100g }} g Protein{% endif %}
+            <small>pro 100 g</small>
+        </p>
+        <a href="{% url 'fitness:recipe-edit' pk=recipe.pk %}">Bearbeiten</a>
+    </article>
+    {% empty %}
+    <p>Noch keine Rezepte angelegt.</p>
+    {% endfor %}
+</div>
+{% endblock %}

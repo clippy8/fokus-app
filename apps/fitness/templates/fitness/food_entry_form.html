@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Essen eintragen — Fokus App{% endblock %}
+
+{% block content %}
+<h1>{% if entry %}Eintrag bearbeiten{% else %}Essen eintragen{% endif %}</h1>
+{% if form.non_field_errors %}
+    <p style="color: var(--pico-del-color);">{{ form.non_field_errors|join:", " }}</p>
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p><small>Bei Rezept + Menge (g) werden Kalorien und Protein automatisch berechnet — danach weiterhin manuell änderbar.</small></p>
+    <button type="submit">Speichern</button>
+    <a href="{% url 'fitness:food-day' date=date %}" role="button" class="secondary">Abbrechen</a>
+</form>
+
+{{ recipe_data|json_script:"recipe-data" }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var dataEl = document.getElementById('recipe-data');
+    var select = document.getElementById('id_recipe');
+    var amountInput = document.getElementById('id_amount_g');
+    var caloriesInput = document.getElementById('id_calories_kcal');
+    var proteinInput = document.getElementById('id_protein_g');
+    if (!dataEl || !select || !amountInput) return;
+    var data = JSON.parse(dataEl.textContent);
+
+    function recalculate() {
+        var info = data[select.value];
+        var amount = parseFloat(amountInput.value);
+        if (!info || !amount) return;
+        if (info.caloriesPer100g !== null) {
+            caloriesInput.value = Math.round(info.caloriesPer100g * amount / 100);
+        }
+        if (info.proteinPer100g !== null) {
+            proteinInput.value = (parseFloat(info.proteinPer100g) * amount / 100).toFixed(1);
+        }
+    }
+
+    select.addEventListener('change', recalculate);
+    amountInput.addEventListener('input', recalculate);
+});
+</script>
+{% endblock %}

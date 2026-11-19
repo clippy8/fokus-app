@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Übungen — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Übungen</h1>
+<p><a href="{% url 'fitness:exercise-add' %}" role="button">+ Neue Übung</a></p>
+
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Gerätenummer</th>
+            <th>Geräteeinstellung</th>
+            <th>Kategorien</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for exercise in exercises %}
+        <tr>
+            <td>
+                {% if exercise.image %}
+                <img src="{{ exercise.image.url }}" alt="{{ exercise.name }}" style="height: 48px; width: 48px; object-fit: cover; border-radius: 4px;">
+                {% endif %}
+            </td>
+            <td>{{ exercise.name }}</td>
+            <td>{{ exercise.equipment_number|default:"—" }}</td>
+            <td>{{ exercise.equipment_setting|default:"—" }}</td>
+            <td>{% for category in exercise.categories.all %}{{ category.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+            <td>{% if exercise.active %}aktiv{% else %}deaktiviert{% endif %}</td>
+            <td>
+                <a href="{% url 'fitness:exercise-history' pk=exercise.pk %}">Verlauf</a>
+                <a href="{% url 'fitness:exercise-edit' pk=exercise.pk %}">Bearbeiten</a>
+                {% if exercise.active %}
+                <form method="post" action="{% url 'fitness:exercise-deactivate' pk=exercise.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary">Deaktivieren</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">Noch keine Übungen angelegt.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
