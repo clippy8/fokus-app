@@ -92,8 +92,8 @@ class Meilenstein(models.Model):
     description = models.TextField(
         verbose_name="Beschreibung",
         help_text=(
-            "Ein Meilenstein ist ein qualitativer Key Result, das dieses Jahresziel herunterbricht "
-            "(wie bei OKRs). Beschreibe, woran du erkennst, dass dieser Meilenstein erreicht ist."
+            "Beschreibe, woran du eindeutig erkennst, dass dieser Meilenstein erreicht ist und das "
+            "Jahresziel dadurch ein großes Stück näher gerückt ist."
         ),
     )
     deadline = models.DateField(verbose_name="Deadline")
