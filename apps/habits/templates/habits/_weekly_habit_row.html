@@ -1,0 +1,12 @@
+<li class="habit-row {% if checked %}checked{% endif %}" id="weekly-habit-{{ habit.id }}">
+    <label>
+        <input
+            type="checkbox"
+            {% if checked %}checked{% endif %}
+            hx-post="{% url 'habits:toggle-weekly' pk=habit.id iso_year=iso_year iso_week=iso_week %}"
+            hx-target="#weekly-habit-{{ habit.id }}"
+            hx-swap="outerHTML"
+        >
+        {{ habit.name }}
+    </label>
+</li>

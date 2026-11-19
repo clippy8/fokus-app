@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Weekly Review {{ review.iso_year }}-W{{ review.iso_week }} — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Weekly Review — KW {{ review.iso_week }}/{{ review.iso_year }}</h1>
+<p><small>{{ week_start }} bis {{ week_end }}</small></p>
+
+<article>
+    <h3>Habits erfüllt</h3>
+    <h4>Daily</h4>
+    <ul>
+        {% for entry in daily_summary %}
+            <li>{{ entry.habit.name }}: {{ entry.checked }} / {{ entry.total }} Tage</li>
+        {% empty %}
+            <li>Keine Daily Habits.</li>
+        {% endfor %}
+    </ul>
+    <h4>Weekly</h4>
+    <ul>
+        {% for entry in weekly_summary %}
+            <li>{{ entry.habit.name }}: {{ entry.checked|yesno:"erledigt,offen" }}</li>
+        {% empty %}
+            <li>Keine Weekly Habits.</li>
+        {% endfor %}
+    </ul>
+</article>
+
+<article>
+    <h3>Zoom out — Meilenstein-Fortschritt</h3>
+    <ul>
+        {% for m in meilensteine %}
+            <li>{{ m.jahresziel.title }} / {{ m.title }}: {{ m.progress_percent }}%</li>
+        {% empty %}
+            <li>Keine Meilensteine.</li>
+        {% endfor %}
+    </ul>
+    <h4>Projekt-Kalender (nach Enddatum)</h4>
+    <ul>
+        {% for p in projekte_calendar %}
+            <li>{{ p.end_date }} — {{ p.title }} ({{ p.get_status_display }})</li>
+        {% empty %}
+            <li>Keine Projekte mit Enddatum.</li>
+        {% endfor %}
+    </ul>
+</article>
+
+<article>
+    <h3>Zoom in — Projekt-Fokus</h3>
+    <h4>Diese Woche</h4>
+    <ul>
+        {% for p in projekte_focus_this_week %}<li>{{ p.title }}</li>{% empty %}<li>Kein Fokus gesetzt.</li>{% endfor %}
+    </ul>
+    <h4>Letzte Woche</h4>
+    <ul>
+        {% for p in projekte_focus_last_week %}<li>{{ p.title }}</li>{% empty %}<li>Kein Fokus gesetzt.</li>{% endfor %}
+    </ul>
+</article>
+
+<article>
+    <h3>Fitness &amp; Finanzen</h3>
+    <p><em>Kommt in einer späteren Phase.</em></p>
+</article>
+
+<article>
+    <h3>Reflexion</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Speichern</button>
+    </form>
+</article>
+
+<p><a href="{% url 'reviews:history' %}">Alle Weekly Reviews ansehen</a></p>
+{% endblock %}

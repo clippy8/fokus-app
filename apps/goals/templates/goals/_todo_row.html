@@ -1,0 +1,14 @@
+<tr id="todo-row-{{ todo.id }}">
+    <td style="{% if todo.status == 'done' %}text-decoration: line-through; opacity: 0.6;{% endif %}">{{ todo.title }}</td>
+    <td>{{ todo.due_date|default:"—" }}</td>
+    <td>{{ todo.projekt|default:"—" }}</td>
+    <td>
+        <form hx-post="{% url 'goals:todo-toggle-done' pk=todo.id %}" hx-target="#todo-row-{{ todo.id }}" hx-swap="outerHTML">
+            {% csrf_token %}
+            <button type="submit" class="secondary">
+                {% if todo.status == 'done' %}Wieder öffnen{% else %}Erledigt{% endif %}
+            </button>
+        </form>
+    </td>
+    <td><a href="{% url 'goals:todo-edit' pk=todo.id %}">Bearbeiten</a></td>
+</tr>

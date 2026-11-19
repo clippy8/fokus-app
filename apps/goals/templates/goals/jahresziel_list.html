@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Ziele — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Jahresziele</h1>
+<p><a href="{% url 'goals:jahresziel-add' %}" role="button">+ Neues Jahresziel</a> <small>(max. 3 nicht-archivierte pro Jahr)</small></p>
+
+{% for ziel in jahresziele %}
+<article>
+    <header>
+        <strong>{{ ziel.year }}: {{ ziel.title }}</strong>
+        <a href="{% url 'goals:jahresziel-edit' pk=ziel.pk %}">Bearbeiten</a>
+        <form method="post" action="{% url 'goals:jahresziel-archive' pk=ziel.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="secondary">Archivieren</button>
+        </form>
+    </header>
+    {% if ziel.description %}<p>{{ ziel.description }}</p>{% endif %}
+
+    {% for meilenstein in ziel.meilensteine.all %}
+        <div style="margin-left: 1.5rem;">
+            <h4>
+                {{ meilenstein.title }}
+                {% if meilenstein.target_date %}<small>(bis {{ meilenstein.target_date }})</small>{% endif %}
+                <a href="{% url 'goals:meilenstein-edit' pk=meilenstein.pk %}">Bearbeiten</a>
+            </h4>
+            <div class="progress-bar"><span style="width: {{ meilenstein.progress_percent }}%;"></span></div>
+            <small>{{ meilenstein.progress_percent }}% der Projekte erledigt</small>
+
+            <ul>
+                {% for projekt in meilenstein.projekte.all %}
+                <li>
+                    {{ projekt.title }} — <em>{{ projekt.get_status_display }}</em>
+                    {% if projekt.end_date %}(bis {{ projekt.end_date }}){% endif %}
+                    <a href="{% url 'goals:projekt-edit' pk=projekt.pk %}">Bearbeiten</a>
+                    <span id="projekt-focus-{{ projekt.id }}">
+                        <label>
+                            <input
+                                type="checkbox"
+                                {% if projekt.pk in focused_ids %}checked{% endif %}
+                                hx-post="{% url 'goals:projekt-toggle-focus' pk=projekt.id %}"
+                                hx-target="#projekt-focus-{{ projekt.id }}"
+                                hx-swap="outerHTML"
+                            >
+                            diese Woche im Fokus
+                        </label>
+                    </span>
+                </li>
+                {% empty %}
+                <li><a href="{% url 'goals:projekt-add' meilenstein_pk=meilenstein.pk %}">+ Projekt hinzufügen</a></li>
+                {% endfor %}
+                {% if meilenstein.projekte.all %}
+                <li><a href="{% url 'goals:projekt-add' meilenstein_pk=meilenstein.pk %}">+ Weiteres Projekt</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    {% empty %}
+        <p><a href="{% url 'goals:meilenstein-add' jahresziel_pk=ziel.pk %}">+ Meilenstein hinzufügen</a></p>
+    {% endfor %}
+    {% if ziel.meilensteine.all %}
+        <p><a href="{% url 'goals:meilenstein-add' jahresziel_pk=ziel.pk %}">+ Weiterer Meilenstein</a> <small>(max. 3)</small></p>
+    {% endif %}
+</article>
+{% empty %}
+<p>Noch keine Jahresziele definiert.</p>
+{% endfor %}
+{% endblock %}

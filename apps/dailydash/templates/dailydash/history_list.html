@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Verlauf — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Verlauf</h1>
+<ul>
+    {% for day in days %}
+        <li>
+            <a href="{% url 'dailydash:day-detail' date=day.date|date:'Y-m-d' %}">{{ day.date }}</a>
+            {% if day.journal_text %}&mdash; <small>{{ day.journal_text|truncatewords:12 }}</small>{% endif %}
+        </li>
+    {% empty %}
+        <li>Noch keine Tage erfasst.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

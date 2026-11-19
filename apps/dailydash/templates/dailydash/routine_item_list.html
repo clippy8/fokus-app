@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Routine-Items — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Routine-Items</h1>
+<p><a href="{% url 'dailydash:routine-item-add' %}" role="button">+ Neues Routine-Item</a></p>
+<table>
+    <thead>
+        <tr><th>Name</th><th>Zeit</th><th>Aktiv</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.get_timing_display }}</td>
+            <td>{{ item.active|yesno:"ja,nein" }}</td>
+            <td>
+                <a href="{% url 'dailydash:routine-item-edit' pk=item.pk %}">Bearbeiten</a>
+                {% if item.active %}
+                <form method="post" action="{% url 'dailydash:routine-item-deactivate' pk=item.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary">Deaktivieren</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Noch keine Routine-Items angelegt.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

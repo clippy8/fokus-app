@@ -1,0 +1,12 @@
+<span id="projekt-focus-{{ projekt.id }}">
+    <label>
+        <input
+            type="checkbox"
+            {% if focused %}checked{% endif %}
+            hx-post="{% url 'goals:projekt-toggle-focus' pk=projekt.id %}"
+            hx-target="#projekt-focus-{{ projekt.id }}"
+            hx-swap="outerHTML"
+        >
+        diese Woche im Fokus
+    </label>
+</span>

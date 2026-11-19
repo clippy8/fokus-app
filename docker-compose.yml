@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    image: fokus-app:latest
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+    volumes:
+      - ./data:/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped

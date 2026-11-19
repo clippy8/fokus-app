@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ day.date }} — Fokus App{% endblock %}
+
+{% block content %}
+<nav aria-label="Tagesnavigation">
+    <ul>
+        <li><a href="{% url 'dailydash:day-detail' date=prev_date %}">&larr; Vorheriger Tag</a></li>
+    </ul>
+    <ul>
+        <li><strong>{{ day.date }}{% if is_today %} (heute){% endif %}</strong></li>
+    </ul>
+    <ul>
+        <li><a href="{% url 'dailydash:day-detail' date=next_date %}">N&auml;chster Tag &rarr;</a></li>
+    </ul>
+</nav>
+
+<div class="grid">
+    <article>
+        <h3>Morgenroutine</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for check in morning_checks %}
+                {% include "dailydash/_routine_check_row.html" with date=day.date|date:'Y-m-d' %}
+            {% empty %}
+                <li><a href="{% url 'dailydash:routine-item-list' %}">Noch keine Morgenroutine definiert.</a></li>
+            {% endfor %}
+        </ul>
+    </article>
+    <article>
+        <h3>Abendroutine</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for check in evening_checks %}
+                {% include "dailydash/_routine_check_row.html" with date=day.date|date:'Y-m-d' %}
+            {% empty %}
+                <li><a href="{% url 'dailydash:routine-item-list' %}">Noch keine Abendroutine definiert.</a></li>
+            {% endfor %}
+        </ul>
+    </article>
+</div>
+
+<article>
+    <h3>Tagebuch</h3>
+    <form hx-post="{% url 'dailydash:journal-save' date=day.date|date:'Y-m-d' %}" hx-trigger="keyup changed delay:800ms" hx-target="#journal-save-status" hx-swap="innerHTML">
+        {% csrf_token %}
+        <textarea name="journal_text" rows="8" placeholder="Wie war dein Tag?">{{ day.journal_text }}</textarea>
+        <div id="journal-save-status"></div>
+    </form>
+</article>
+{% endblock %}

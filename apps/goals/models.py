@@ -1,0 +1,148 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+
+MAX_JAHRESZIELE_PER_YEAR = 3
+MAX_MEILENSTEINE_PER_ZIEL = 3
+
+
+class Jahresziel(models.Model):
+    ACTIVE = "active"
+    DONE = "done"
+    ARCHIVED = "archived"
+    STATUS_CHOICES = [
+        (ACTIVE, "Active"),
+        (DONE, "Done"),
+        (ARCHIVED, "Archived"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="jahresziele")
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    year = models.PositiveSmallIntegerField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=ACTIVE)
+    order = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-year", "order", "id"]
+
+    def __str__(self):
+        return f"{self.year}: {self.title}"
+
+    def clean(self):
+        if self.status != self.ARCHIVED:
+            qs = Jahresziel.objects.filter(user=self.user, year=self.year).exclude(status=self.ARCHIVED).exclude(pk=self.pk)
+            if qs.count() >= MAX_JAHRESZIELE_PER_YEAR:
+                raise ValidationError(f"Maximum of {MAX_JAHRESZIELE_PER_YEAR} Jahresziele per year reached.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class Meilenstein(models.Model):
+    OPEN = "open"
+    DONE = "done"
+    STATUS_CHOICES = [
+        (OPEN, "Open"),
+        (DONE, "Done"),
+    ]
+
+    jahresziel = models.ForeignKey(Jahresziel, on_delete=models.CASCADE, related_name="meilensteine")
+    title = models.CharField(max_length=255)
+    order = models.PositiveSmallIntegerField(default=0)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=OPEN)
+    target_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.title
+
+    def clean(self):
+        qs = Meilenstein.objects.filter(jahresziel=self.jahresziel).exclude(pk=self.pk)
+        if qs.count() >= MAX_MEILENSTEINE_PER_ZIEL:
+            raise ValidationError(f"Maximum of {MAX_MEILENSTEINE_PER_ZIEL} Meilensteine per Jahresziel reached.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    @property
+    def progress_percent(self):
+        total = self.projekte.count()
+        if not total:
+            return 0
+        done = self.projekte.filter(status=Projekt.DONE).count()
+        return round(100 * done / total)
+
+
+class Projekt(models.Model):
+    ACTIVE = "active"
+    PAUSED = "paused"
+    DONE = "done"
+    ARCHIVED = "archived"
+    STATUS_CHOICES = [
+        (ACTIVE, "Active"),
+        (PAUSED, "Paused"),
+        (DONE, "Done"),
+        (ARCHIVED, "Archived"),
+    ]
+
+    meilenstein = models.ForeignKey(Meilenstein, on_delete=models.CASCADE, related_name="projekte")
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=ACTIVE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["end_date", "id"]
+
+    def __str__(self):
+        return self.title
+
+    def is_focused_in(self, iso_year, iso_week):
+        return self.week_focus_entries.filter(iso_year=iso_year, iso_week=iso_week).exists()
+
+
+class ProjectWeekFocus(models.Model):
+    projekt = models.ForeignKey(Projekt, on_delete=models.CASCADE, related_name="week_focus_entries")
+    iso_year = models.PositiveSmallIntegerField()
+    iso_week = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("projekt", "iso_year", "iso_week")
+
+    def __str__(self):
+        return f"{self.projekt.title} / {self.iso_year}-W{self.iso_week}"
+
+
+class Todo(models.Model):
+    OPEN = "open"
+    DONE = "done"
+    STATUS_CHOICES = [
+        (OPEN, "Open"),
+        (DONE, "Done"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="todos")
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    due_date = models.DateField(null=True, blank=True)
+    projekt = models.ForeignKey(Projekt, null=True, blank=True, on_delete=models.SET_NULL, related_name="todos")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=OPEN)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["due_date", "id"]
+
+    def __str__(self):
+        return self.title

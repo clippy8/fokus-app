@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Login — Fokus App{% endblock %}
+
+{% block content %}
+<article style="max-width: 400px; margin: 2rem auto;">
+    <h1>Login</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+            <p style="color: var(--pico-del-color);">Benutzername oder Passwort falsch.</p>
+        {% endif %}
+        <label for="{{ form.username.id_for_label }}">Benutzername</label>
+        <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" required autofocus>
+        <label for="{{ form.password.id_for_label }}">Passwort</label>
+        <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" required>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit">Einloggen</button>
+    </form>
+</article>
+{% endblock %}

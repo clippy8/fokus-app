@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Habits — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Habits</h1>
+<p><a href="{% url 'habits:add' %}" role="button">+ Neuer Habit</a> <small>(max. 5 aktive insgesamt)</small></p>
+
+<div class="grid">
+    <article>
+        <h3>Daily Habits — {{ today }}</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for entry in daily_habits %}
+                {% include "habits/_daily_habit_row.html" with habit=entry.habit checked=entry.checked date=today %}
+            {% empty %}
+                <li>Keine Daily Habits angelegt.</li>
+            {% endfor %}
+        </ul>
+    </article>
+    <article>
+        <h3>Weekly Habits — KW {{ iso_week }}/{{ iso_year }}</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for entry in weekly_habits %}
+                {% include "habits/_weekly_habit_row.html" with habit=entry.habit checked=entry.checked iso_year=iso_year iso_week=iso_week %}
+            {% empty %}
+                <li>Keine Weekly Habits angelegt.</li>
+            {% endfor %}
+        </ul>
+    </article>
+</div>
+
+<h3>Verwaltung</h3>
+<table>
+    <thead><tr><th>Name</th><th>Frequenz</th><th></th></tr></thead>
+    <tbody>
+        {% for entry in daily_habits %}
+        <tr>
+            <td>{{ entry.habit.name }}</td>
+            <td>Daily</td>
+            <td>
+                <a href="{% url 'habits:edit' pk=entry.habit.pk %}">Bearbeiten</a>
+                <form method="post" action="{% url 'habits:deactivate' pk=entry.habit.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary">Deaktivieren</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        {% for entry in weekly_habits %}
+        <tr>
+            <td>{{ entry.habit.name }}</td>
+            <td>Weekly</td>
+            <td>
+                <a href="{% url 'habits:edit' pk=entry.habit.pk %}">Bearbeiten</a>
+                <form method="post" action="{% url 'habits:deactivate' pk=entry.habit.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary">Deaktivieren</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

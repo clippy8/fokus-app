@@ -1,0 +1,12 @@
+<li class="habit-row {% if checked %}checked{% endif %}" id="daily-habit-{{ habit.id }}">
+    <label>
+        <input
+            type="checkbox"
+            {% if checked %}checked{% endif %}
+            hx-post="{% url 'habits:toggle-daily' pk=habit.id date=date %}"
+            hx-target="#daily-habit-{{ habit.id }}"
+            hx-swap="outerHTML"
+        >
+        {{ habit.name }}
+    </label>
+</li>

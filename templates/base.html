@@ -1,0 +1,47 @@
+{% load static %}
+<!doctype html>
+<html lang="de" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Fokus App{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+<body>
+    <header class="container">
+        <nav>
+            <ul>
+                <li><strong>Fokus App</strong></li>
+            </ul>
+            {% if user.is_authenticated %}
+            <ul>
+                <li><a href="{% url 'dailydash:today' %}">Dashboard</a></li>
+                <li><a href="{% url 'dailydash:history' %}">Verlauf</a></li>
+                <li><a href="{% url 'habits:list' %}">Habits</a></li>
+                <li><a href="{% url 'goals:list' %}">Ziele</a></li>
+                <li><a href="{% url 'goals:todo-list' %}">Todos</a></li>
+                <li><a href="{% url 'reviews:current' %}">Weekly Review</a></li>
+            </ul>
+            <ul>
+                <li>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="secondary">Logout</button>
+                    </form>
+                </li>
+            </ul>
+            {% endif %}
+        </nav>
+    </header>
+    <main class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <article>{{ message }}</article>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

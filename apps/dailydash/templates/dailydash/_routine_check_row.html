@@ -1,0 +1,12 @@
+<li class="routine-row {% if check.checked %}checked{% endif %}" id="routine-check-{{ check.id }}">
+    <label>
+        <input
+            type="checkbox"
+            {% if check.checked %}checked{% endif %}
+            hx-post="{% url 'dailydash:routine-check-toggle' date=date check_id=check.id %}"
+            hx-target="#routine-check-{{ check.id }}"
+            hx-swap="outerHTML"
+        >
+        {{ check.routine_item.name }}
+    </label>
+</li>

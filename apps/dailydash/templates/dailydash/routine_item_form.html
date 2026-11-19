@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Routine-Item — Fokus App{% endblock %}
+
+{% block content %}
+<h1>{% if item %}Routine-Item bearbeiten{% else %}Neues Routine-Item{% endif %}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Speichern</button>
+    <a href="{% url 'dailydash:routine-item-list' %}" role="button" class="secondary">Abbrechen</a>
+</form>
+{% endblock %}

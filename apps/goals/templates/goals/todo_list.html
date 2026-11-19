@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Todos — Fokus App{% endblock %}
+
+{% block content %}
+<h1>Todos</h1>
+<p><a href="{% url 'goals:todo-add' %}" role="button">+ Neues Todo</a></p>
+<p>
+    <a href="{% url 'goals:todo-list' %}">Alle</a> |
+    <a href="{% url 'goals:todo-list' %}?status=open">Offen</a> |
+    <a href="{% url 'goals:todo-list' %}?status=done">Erledigt</a>
+</p>
+<table>
+    <thead><tr><th>Titel</th><th>Fällig</th><th>Projekt</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+        {% for todo in todos %}
+            {% include "goals/_todo_row.html" %}
+        {% empty %}
+            <tr><td colspan="5">Keine Todos.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
