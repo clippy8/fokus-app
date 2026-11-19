@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Weekly Review Verlauf — Fokus App{% endblock %}
+{% block title %}Wochenrückblick Verlauf — Fokus App{% endblock %}
 
 {% block content %}
-<h1>Weekly Review — Verlauf</h1>
+<h1>Wochenrückblick — Verlauf</h1>
 <ul>
     {% for review in reviews %}
         <li>
@@ -13,7 +13,7 @@
             — {{ review.get_status_display }}
         </li>
     {% empty %}
-        <li>Noch keine Weekly Reviews.</li>
+        <li>Noch keine Wochenrückblicke.</li>
     {% endfor %}
 </ul>
 {% endblock %}

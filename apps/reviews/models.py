@@ -7,16 +7,16 @@ class WeeklyReview(models.Model):
     NO = "no"
     PARTIAL = "partial"
     ACHIEVED_CHOICES = [
-        (YES, "Yes"),
-        (NO, "No"),
-        (PARTIAL, "Partially"),
+        (YES, "Ja"),
+        (NO, "Nein"),
+        (PARTIAL, "Teilweise"),
     ]
 
     DRAFT = "draft"
     COMPLETED = "completed"
     STATUS_CHOICES = [
-        (DRAFT, "Draft"),
-        (COMPLETED, "Completed"),
+        (DRAFT, "Entwurf"),
+        (COMPLETED, "Abgeschlossen"),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="weekly_reviews")
